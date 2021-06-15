@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31112.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KF3Toolbox", "KF3Toolbox\KF3Toolbox.csproj", "{8BFCFECD-AE90-4E5B-8869-1DD0193B1887}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KF3Shared", "KF3Shared\KF3Shared.csproj", "{DF0762B1-5EE3-4DD3-9015-82D73BD2A14F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8BFCFECD-AE90-4E5B-8869-1DD0193B1887}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BFCFECD-AE90-4E5B-8869-1DD0193B1887}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BFCFECD-AE90-4E5B-8869-1DD0193B1887}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BFCFECD-AE90-4E5B-8869-1DD0193B1887}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF0762B1-5EE3-4DD3-9015-82D73BD2A14F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF0762B1-5EE3-4DD3-9015-82D73BD2A14F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF0762B1-5EE3-4DD3-9015-82D73BD2A14F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF0762B1-5EE3-4DD3-9015-82D73BD2A14F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {731552AD-28AB-4AA2-B494-6C5C9055BCA6}
+	EndGlobalSection
+EndGlobal
