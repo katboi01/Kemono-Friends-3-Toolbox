@@ -17,9 +17,10 @@ namespace KF3Shared
             assetsPath = Directory.GetCurrentDirectory() + "/Parameters/MonoBehaviour/";
             paramsPath = Directory.GetCurrentDirectory() + "/Parameters/MonoBehaviour/";
             cachePath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\Temp\\SEGA\\けもフレ３\\";
-
             exportPath = Directory.GetCurrentDirectory() + @"\export\";
+            guiPath = Directory.GetCurrentDirectory() + @"\icons\";
 
+            Directory.CreateDirectory(guiPath);
             Directory.CreateDirectory(exportPath);
             Directory.CreateDirectory(exportPath + @"wiki\");
             Directory.CreateDirectory(exportPath + @"photos\");

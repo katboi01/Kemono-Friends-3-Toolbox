@@ -112,16 +112,29 @@ namespace KF3Toolbox.GUIHere
         {
             tabControl1.TabPages.Clear();
             int i = 0;
-            foreach(KF3Parse.CharaClothesData clothesData in friend.clothesDatas)
+            foreach (KF3Parse.CharaClothesData clothesData in friend.clothesDatas)
             {
                 tabControl1.TabPages.Add(clothesData.name);
+                Bitmap bmp;
 
-                string link = $"https://sandstar.site/static/kf3_db/Texture2D/icon_dressup/icon_dressup_{clothesData.id}.png";
-                System.Net.WebRequest request = System.Net.WebRequest.Create(link);
-                System.Net.WebResponse resp = request.GetResponse();
-                System.IO.Stream respStream = resp.GetResponseStream();
-                Bitmap bmp = new Bitmap(respStream);
-                respStream.Dispose();
+                if (!File.Exists(KF3Shared.SharedSettings.guiPath + $"icon_dressup_{ clothesData.id}.png"))
+                {
+                    string link = $"https://sandstar.site/static/kf3_db/Texture2D/icon_dressup/icon_dressup_{clothesData.id}.png";
+                    System.Net.WebRequest request = System.Net.WebRequest.Create(link);
+                    System.Net.WebResponse resp = request.GetResponse();
+                    using (Stream respStream = resp.GetResponseStream())
+                    {
+                        bmp = new Bitmap(respStream);
+                        bmp.Save(KF3Shared.SharedSettings.guiPath + $"icon_dressup_{ clothesData.id}.png");
+                    }
+                }
+                else
+                {
+                    using (Stream input = File.OpenRead(KF3Shared.SharedSettings.guiPath + $"icon_dressup_{ clothesData.id}.png"))
+                    {
+                        bmp = new Bitmap(input);
+                    }
+                }
 
                 tabControl1.TabPages[i].BackgroundImage = bmp;
                 tabControl1.TabPages[i].BackgroundImageLayout = ImageLayout.Center;
