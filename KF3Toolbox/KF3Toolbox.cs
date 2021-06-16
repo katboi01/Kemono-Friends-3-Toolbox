@@ -156,7 +156,7 @@ namespace KF3Toolbox
                 AutoFlush = true
             };
             Console.SetOut(sw);
-            bool running = runConsole, testMode = false;
+            bool running = runConsole;
             string shortNumber;
             while (running)
             {
@@ -167,21 +167,17 @@ namespace KF3Toolbox
                     
                     switch (input)
                     {
-                        case "1": DispWiki(loadedFriend, false); break;
-                        case "2": DispFacts(ref loadedFriend, false); break;
-                        case "3": DispSkills(loadedFriend, false); break;
-                        case "4": DispPromoteItems(ref loadedFriend, false); break;
+                        case "1": Console.Clear(); DispStats(loadedFriend, false); break;
+                        case "2": Console.Clear(); DispFacts(ref loadedFriend, false); break;
+                        case "3": Console.Clear(); DispSkills(loadedFriend, false); break;
+                        case "4": Console.Clear(); DispPromoteItems(ref loadedFriend, false); break;
                         case "5": Console.Clear(); friendLoaded = false; break;
-                        case "6": ExportFriend(ref loadedFriend, false); break;
+                        case "6": Console.Clear(); ExportFriend(loadedFriend, true); break;
                         case "7": GetDropLocations(14019); break;
                         case "0": return;
                         default: break;
                     }
                     
-                }
-                else if (testMode)
-                {
-                    Console.WriteLine("awaiting commands...");
                 }
                 else
                 {
@@ -191,7 +187,7 @@ namespace KF3Toolbox
                     switch (shortNumber)
                     {
                         case "test": break;
-                        case "list": ReadFriendListDebug(); break;
+                        case "list": ReadFriendList(); break;
                         case "list enemies": ReadEnemyListDebug(); break;
                         case "listmax": ListMaxStats(); break;
                         case "droplist": ReadDropData(); break;

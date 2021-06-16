@@ -11,13 +11,6 @@ namespace KF3Toolbox
     {
         public StatsBrief DispStats(CharaData friend, bool wiki = false)
         {
-            if (wiki) { Console.Out.Close(); sw = new StreamWriter(SharedSettings.exportPath + friend.nameEn + "_" + friend.id + ".txt", true); Console.SetOut(sw); Console.WriteLine("\n S T A T S\n"); }
-            else
-            {
-                Console.Clear();
-                Console.WriteLine("Loaded Friend: " + friend.id + "_" + friend.nameEn + "\n");
-            }
-
             string outputString = "";
             int hpCosBonus = 0, atkCosBonus = 0, defCosBonus = 0;
 
@@ -66,14 +59,10 @@ namespace KF3Toolbox
                 $"{friend.paramAlphaBase.orderCardType03} {friend.paramAlphaBase.orderCardValue03}\n" +
                 $"{friend.paramAlphaBase.orderCardType04} {friend.paramAlphaBase.orderCardValue04}\n";
 
-            Console.WriteLine(outputString);
 
-            if (wiki)
+            if (!wiki)
             {
-                Console.Out.Close(); sw = new StreamWriter(Console.OpenStandardOutput())
-                {
-                    AutoFlush = true
-                }; Console.SetOut(sw);
+                Console.WriteLine(outputString);
             }
             return new StatsBrief()
             {
@@ -257,7 +246,7 @@ namespace KF3Toolbox
                 }; Console.SetOut(sw);
             }
         }
-        void DispWiki(CharaData friend, bool wiki)
+        void DispWiki(CharaData friend, bool wiki = false)
         {
             string outputString = "";
 
@@ -300,7 +289,7 @@ namespace KF3Toolbox
                 $"|try=+{friend.GetPromoteStat(0, "try")}%\n" +
                 $"|plasm={friend.paramAlphaBase.plasmPoint}\n";
 
-            StatsBrief sb = DispStats(friend);
+            StatsBrief sb = DispStats(friend, true);
 
             outputString += 
                 $"|maxstatus={sb.status}\n" +
@@ -432,11 +421,8 @@ namespace KF3Toolbox
             cos += "end";
 
             outputString += cos + cosname + cosobt + "\n}}";
-            //Console.WriteLine(outputString);
 
-            File.WriteAllText(SharedSettings.exportPath + "wiki/" + friend.nameEn + "_" + friend.id + "_wiki.txt", outputString);
-
-            //if (wiki) { SwitchToFileOutput(false, ""); }
+            if (wiki) { File.WriteAllText(SharedSettings.exportPath + "wiki/" + friend.nameEn + "_" + friend.id + "_wiki.txt", outputString); }
         }
     }
 }

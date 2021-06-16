@@ -113,6 +113,7 @@ namespace KF3Toolbox
             Console.Clear();
             Console.WriteLine("Files successfully exported to " + SharedSettings.exportPath + "photos\\ \n");
         }
+
         void ExportForWiki()
         {
             foreach(CharaData data in charaData)
@@ -123,28 +124,18 @@ namespace KF3Toolbox
                 }
                 catch
                 {
-                    SwitchToFileOutput(false, "");
                     Console.WriteLine("export failed: " + data.name);
                 }
             }
         }
-        void ExportFriend(ref CharaData friend, bool wiki)
+
+        void ExportFriend(CharaData friend, bool wiki)
         {
             Console.Clear();
-            Directory.CreateDirectory(SharedSettings.exportPath);
-            Console.Out.Close(); sw = new StreamWriter(SharedSettings.exportPath + friend.nameEn + "_" + friend.id + ".txt"); Console.SetOut(sw); Console.WriteLine(friend.id + "_" + friend.nameEn);
-            //resets output after writing the first line
-            Console.Out.Close(); sw = new StreamWriter(Console.OpenStandardOutput())
-            {
-                AutoFlush = true
-            }; Console.SetOut(sw);
-            DispFacts(ref friend, true);
-            DispStats(friend, true);
-            DispSkills(friend, true);
-            DispPromoteItems(ref friend, true);
-            Console.WriteLine("Exported friend data to: " + SharedSettings.exportPath + friend.nameEn + "_" + friend.id + ".txt");
-
+            DispWiki(friend, true);
+            Console.WriteLine("Exported friend data to: " + SharedSettings.exportPath + "wiki/" + friend.nameEn + "_" + friend.id + ".txt");
         }
+
         void ExportScenarios()
         {
             List<Scenario> scenarios = new List<Scenario>();
