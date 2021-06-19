@@ -1,11 +1,13 @@
 # Kemono-Friends-3-Toolbox
-Requirements:
+A (mostly) console application that aids in extracting useful information from KF3's cache files.
+
+## Requirements:
 
 -KF3 DMM installed and playable
 
 -A file extracted with https://github.com/Perfare/AssetStudio, detailed instructions are inside the program
 
-It can:
+## It can:
 
 -List all friends in cache with their id's
 
