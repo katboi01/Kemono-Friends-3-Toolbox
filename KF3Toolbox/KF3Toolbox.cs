@@ -200,14 +200,14 @@ namespace KF3Toolbox
                     if (fastboot)
                     {
                         Console.WriteLine(" Input Friend ID - single friend load \n list - friend list" +
-                            "\n export - rewrite cache to txt \n export wiki - export all friends to human + wiki formatting " +
+                            "\n export - rewrite cache to txt \n export wiki - export all friends to wiki formatting " +
                             "\n export cards - exports photos to txt" +
                             "\n listmax - generate sorted list of friends based on stats \n 0 - exit");
                     }
                     else
                     {
                         Console.WriteLine(" Input Friend ID - single friend load \n list enemies - cellien list \n list - friend list" +
-                            "\n export - rewrite cache to txt \n export wiki - export all friends to human + wiki formatting " +
+                            "\n export - rewrite cache to txt \n export wiki - export all friends to wiki formatting " +
                             "\n export cards - exports photos to txt \n droplist - generate list of stages and their loot" +
                             "\n listmax - generate sorted list of friends based on stats \n 0 - exit");
                     }
