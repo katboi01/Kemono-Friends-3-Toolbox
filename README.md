@@ -2,6 +2,7 @@
 Requirements:
 
 -KF3 DMM installed and playable
+
 -A file extracted with https://github.com/Perfare/AssetStudio, detailed instructions are inside the program
 
 It can:
