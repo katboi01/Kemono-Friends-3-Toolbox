@@ -118,22 +118,20 @@ namespace KF3Toolbox
         {
             foreach(CharaData data in charaData)
             {
-                try
+                if (!DispWiki(data, true))
                 {
-                    DispWiki(data, true);
-                }
-                catch
-                {
-                    Console.WriteLine("export failed: " + data.name);
+                    Console.WriteLine("export failed: " + data.id + " " + data.name);
                 }
             }
         }
 
         void ExportFriend(CharaData friend, bool wiki)
         {
-            Console.Clear();
-            DispWiki(friend, true);
-            Console.WriteLine("Exported friend data to: " + SharedSettings.exportPath + "wiki/" + friend.nameEn + "_" + friend.id + ".txt");
+            if (DispWiki(friend, true))
+            {
+                Console.WriteLine("Exported friend data to: " + SharedSettings.exportPath + "wiki/" + friend.nameEn + "_" + friend.id + ".txt");
+            }
+            else Console.WriteLine("Export failed");
         }
 
         void ExportScenarios()
@@ -206,7 +204,7 @@ namespace KF3Toolbox
             {
                 try
                 {
-                    StatsBrief sb = DispStats(friend);
+                    StatsBrief sb = DispStats(friend, true);
                     topList.Add(friend.id, new int[4] { sb.status, sb.hp, sb.atk, sb.def });
                 }
                 catch

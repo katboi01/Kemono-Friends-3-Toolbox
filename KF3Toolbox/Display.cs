@@ -11,6 +11,11 @@ namespace KF3Toolbox
     {
         public StatsBrief DispStats(CharaData friend, bool wiki = false)
         {
+            if (friend.promotePresetDatas.Count < 4)
+            {
+                throw new Exception();
+            }
+
             string outputString = "";
             int hpCosBonus = 0, atkCosBonus = 0, defCosBonus = 0;
 
@@ -109,14 +114,9 @@ namespace KF3Toolbox
 
         }
 
-        public SkillsBrief DispSkills(CharaData friend, bool wiki = false)
+        public SkillsBrief DispSkills(CharaData friend)
         {
-            if (wiki) { Console.Out.Close(); sw = new StreamWriter(SharedSettings.exportPath + friend.nameEn + "_" + friend.id + ".txt", true); Console.SetOut(sw); Console.WriteLine("\n S K I L L S\n"); }
-            else
-            {
-                Console.Clear();
-                Console.WriteLine("Loaded Friend: " + friend.id + "_" + friend.nameEn + "\n");
-            }
+            Console.WriteLine("Loaded Friend: " + friend.id + "_" + friend.nameEn + "\n");
             string output = "";
             //miracle
             output += $"Miracle: {friend.paramArts.actionName}\n{friend.paramArts.actionEffect}\n" +
@@ -165,13 +165,6 @@ namespace KF3Toolbox
                 Console.WriteLine($"\n Turns: {buff.turn} Activation rate: {buff.successRate}%");
             }
 
-            if (wiki)
-            {
-                Console.Out.Close(); sw = new StreamWriter(Console.OpenStandardOutput())
-                {
-                    AutoFlush = true
-                }; Console.SetOut(sw);
-            }
             return new SkillsBrief()
             {
                 MiracleName = friend.paramArts.actionName,
@@ -185,8 +178,8 @@ namespace KF3Toolbox
                 WaitName = friend.paramWaitAction.skillName,
                 WaitDesc = friend.paramWaitAction.skillEffect,
 
-                Ability1Name = friend.paramAbility1.abilityName,
-                Ability1Desc = friend.paramAbility1.abilityEffect,
+                Ability1Name = friend.paramAbility1?.abilityName,
+                Ability1Desc = friend.paramAbility1?.abilityEffect,
                 AbilityName = friend.paramAbility.abilityName,
                 AbilityDesc = friend.paramAbility.abilityEffect
             };
@@ -246,9 +239,12 @@ namespace KF3Toolbox
                 }; Console.SetOut(sw);
             }
         }
-        void DispWiki(CharaData friend, bool wiki = false)
+        bool DispWiki(CharaData friend, bool wiki = false)
         {
             string outputString = "";
+
+            StatsBrief sb = null;
+            try { sb = DispStats(friend, true); } catch { Console.WriteLine("failed"); return false; }
 
             string starsWord = "";
             switch (friend.rankLow)
@@ -288,8 +284,6 @@ namespace KF3Toolbox
                 $"|action=+{friend.GetPromoteStat(0, "act")}%\n" +
                 $"|try=+{friend.GetPromoteStat(0, "try")}%\n" +
                 $"|plasm={friend.paramAlphaBase.plasmPoint}\n";
-
-            StatsBrief sb = DispStats(friend, true);
 
             outputString += 
                 $"|maxstatus={sb.status}\n" +
@@ -348,8 +342,8 @@ namespace KF3Toolbox
             "|standbyskill=" + friend.paramWaitAction.skillEffect + "\n" +
             "|unique=" + friend.paramAbility.abilityName + "\n" +
             "|uniqueskill=" + friend.paramAbility.abilityEffect + "\n" +
-            "|miracletrait=" + friend.paramAbility1.abilityName + "\n" +
-            "|miracletraitskill=" + friend.paramAbility1.abilityEffect + "\n";
+            "|miracletrait=" + friend.paramAbility1?.abilityName + "\n" +
+            "|miracletraitskill=" + friend.paramAbility1?.abilityEffect + "\n";
 
 
             string cos = "\n|cos = ";
@@ -423,6 +417,7 @@ namespace KF3Toolbox
             outputString += cos + cosname + cosobt + "\n}}";
 
             if (wiki) { File.WriteAllText(SharedSettings.exportPath + "wiki/" + friend.nameEn + "_" + friend.id + "_wiki.txt", outputString); }
+            return true;
         }
     }
 }

@@ -162,14 +162,16 @@ namespace KF3Toolbox
             {
                 if (friendLoaded)
                 {
-                    Console.WriteLine("\n 1 - show stats \n 2 - show animal data \n 3 - show special attacks \n 4 - show upgrade items \n 5 - change friend \n 6 - export friend data \n 0 - quit");
+                    Console.WriteLine("\n 1 - show stats \n 2 - show animal data \n 3 - show special attacks " +
+                        "\n 4 - show upgrade items \n 5 - change friend \n 6 - export friend data " +
+                        "\n 0 - quit");
                     string input = Console.ReadLine();
                     
                     switch (input)
                     {
-                        case "1": Console.Clear(); DispStats(loadedFriend, false); break;
+                        case "1": Console.Clear(); try { DispStats(loadedFriend, false); } catch { Console.WriteLine("failed"); } break;
                         case "2": Console.Clear(); DispFacts(ref loadedFriend, false); break;
-                        case "3": Console.Clear(); DispSkills(loadedFriend, false); break;
+                        case "3": Console.Clear(); DispSkills(loadedFriend); break;
                         case "4": Console.Clear(); DispPromoteItems(ref loadedFriend, false); break;
                         case "5": Console.Clear(); friendLoaded = false; break;
                         case "6": Console.Clear(); ExportFriend(loadedFriend, true); break;
@@ -181,15 +183,27 @@ namespace KF3Toolbox
                 }
                 else
                 {
-                    Console.WriteLine(" Input Friend ID - single friend load \n list enemies - cellien list \n list - friend list \n export - rewrite cache to txt \n export wiki - export all friends to human + wiki formatting " +
-                        "\n export cards - exports photos to txt \n droplist - generate list of stages and their loot (requires slowboot) \n listmax - generate sorted list of friends based on stats \n 0 - exit");
+                    if (fastboot)
+                    {
+                        Console.WriteLine(" Input Friend ID - single friend load \n list - friend list" +
+                            "\n export - rewrite cache to txt \n export wiki - export all friends to human + wiki formatting " +
+                            "\n export cards - exports photos to txt" +
+                            "\n listmax - generate sorted list of friends based on stats \n 0 - exit");
+                    }
+                    else
+                    {
+                        Console.WriteLine(" Input Friend ID - single friend load \n list enemies - cellien list \n list - friend list" +
+                            "\n export - rewrite cache to txt \n export wiki - export all friends to human + wiki formatting " +
+                            "\n export cards - exports photos to txt \n droplist - generate list of stages and their loot" +
+                            "\n listmax - generate sorted list of friends based on stats \n 0 - exit");
+                    }
                     shortNumber = Console.ReadLine();
                     switch (shortNumber)
                     {
                         case "test": break;
                         case "list": ReadFriendList(); break;
                         case "list enemies": ReadEnemyListDebug(); break;
-                        case "listmax": ListMaxStats(); break;
+                        case "listmax": Console.Clear(); ListMaxStats(); break;
                         case "droplist": ReadDropData(); break;
                         case "export":
                             {
