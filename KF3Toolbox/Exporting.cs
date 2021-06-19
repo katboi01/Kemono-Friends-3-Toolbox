@@ -39,6 +39,7 @@ namespace KF3Toolbox
 
                     foreach (JProperty p in o.Properties())
                     {
+                        /* Advanced users only
                         if(p.Name == "bannerName")
                         {
                             if(p.Value.ToString() != "")
@@ -83,13 +84,15 @@ namespace KF3Toolbox
                                 }
                             }
                         }
+                        */
                         sw.Write($"{p.Value.ToString().Replace("\n", " ")};");
                     }
                     sw.WriteLine();
                 }
             }
-            Console.WriteLine("Friend list exported to: " + SharedSettings.exportPath + fileName);
+            Console.WriteLine("File exported to: " + SharedSettings.exportPath + fileName);
         }
+
         void ExportPhotos()
         {
             Console.Clear();
@@ -220,7 +223,6 @@ namespace KF3Toolbox
                 int rank = 1;
                 string outputString = "";
 
-                SwitchToFileOutput(true, SharedSettings.exportPath + $"TopList_{fileNames[i]}_{timeStamp}.txt");
                 foreach (KeyValuePair<int, int[]> pair in topList.OrderByDescending(key => key.Value[i]))
                 {
                     CharaData friend = charaData.Where(f => f.id == pair.Key).First();
@@ -233,10 +235,10 @@ namespace KF3Toolbox
                         outputString += $"{rank++};{friend.nameEn};{pair.Value[i]}\n";
                     }
                 }
-                Console.WriteLine(outputString);
+                File.WriteAllText(SharedSettings.exportPath + $"TopList_{fileNames[i]}_{timeStamp}.txt", outputString);
+                Console.WriteLine($"Exported to {SharedSettings.exportPath + $"TopList_{ fileNames[i]}_{ timeStamp}.txt"}");
             }
-
-            SwitchToFileOutput(false, "");
+            Console.WriteLine();
         }
     }
 }

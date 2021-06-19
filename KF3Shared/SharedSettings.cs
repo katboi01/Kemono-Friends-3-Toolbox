@@ -13,8 +13,8 @@ namespace KF3Shared
 
         public static void LocalDirectoriesManager(bool update)
         {
-            //assetsPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\SEGA\\けもフレ３\\StreamingAssets\\assets\\";
-            assetsPath = Directory.GetCurrentDirectory() + "/Parameters/MonoBehaviour/";
+            assetsPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"}\\SEGA\\けもフレ３\\StreamingAssets\\assets\\";
+            //assetsPath = Directory.GetCurrentDirectory() + "/Parameters/MonoBehaviour/";
             paramsPath = Directory.GetCurrentDirectory() + "/Parameters/MonoBehaviour/";
             cachePath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\Temp\\SEGA\\けもフレ３\\";
             exportPath = Directory.GetCurrentDirectory() + @"\export\";
@@ -26,6 +26,7 @@ namespace KF3Shared
             Directory.CreateDirectory(exportPath + @"photos\");
             Directory.CreateDirectory(exportPath + @"gachaBanner\");
             Directory.CreateDirectory(exportPath + @"homeBanner\");
+            Directory.CreateDirectory(exportPath + @"cache\");
         }
     }
 }

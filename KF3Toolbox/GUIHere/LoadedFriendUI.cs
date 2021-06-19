@@ -42,90 +42,62 @@ namespace KF3Toolbox.GUIHere
         private void UpdateFriendStats()
         {
             float starBoost = 1 + (starsTrackBar.Value - 1) * 0.02f;
-
+            int hp, atk, def;
             int hpCosBonus = 0, atkCosBonus = 0, defCosBonus = 0;
-            foreach (KF3Parse.CharaClothesData clothe in friend.clothesDatas)
+            foreach (CharaClothesData clothe in friend.clothesDatas)
             {
-                if (friend.rankHigh < clothe.getRank) { continue; }
+                if (starsTrackBar.Value < clothe.getRank) { continue; }
                 hpCosBonus += clothe.hpBonus;
                 atkCosBonus += clothe.atkBonus;
                 defCosBonus += clothe.defBonus;
             }
 
-            if (levelTrackBar.Value <= friend.paramAlphaBase.hpLvMiddleNum)
-            {
-                hpLabel.Text = "Hp: "
-                    + (Math.Ceiling((KF3Parse.Interpolate(
-                    friend.paramAlphaBase.hpParamLv1,
-                    friend.paramAlphaBase.hpParamLvMiddle,
-                    levelTrackBar.Value,
-                    friend.paramAlphaBase.hpLvMiddleNum)
-                    + friend.GetPromoteStat(wrTrackBar.Value, "hp")) * starBoost)
-                    + hpCosBonus);
-                atkLabel.Text = "Atk: "
-                    + (Math.Ceiling((KF3Parse.Interpolate(
-                    friend.paramAlphaBase.atkParamLv1,
-                    friend.paramAlphaBase.atkParamLvMiddle,
-                    levelTrackBar.Value,
-                    friend.paramAlphaBase.atkLvMiddleNum)
-                    + friend.GetPromoteStat(wrTrackBar.Value, "atk")) * starBoost)
-                    + atkCosBonus);
-                defLabel.Text = "Def: "
-                    + (Math.Ceiling((KF3Parse.Interpolate(
-                    friend.paramAlphaBase.defParamLv1,
-                    friend.paramAlphaBase.defParamLvMiddle,
-                    levelTrackBar.Value,
-                    friend.paramAlphaBase.defLvMiddleNum)
-                    + friend.GetPromoteStat(wrTrackBar.Value, "def")) * starBoost)
-                    + defCosBonus);
-            }
-            else
-            {
-                hpLabel.Text = "Hp: "
-                    + (Math.Ceiling((KF3Parse.Interpolate(
-                    friend.paramAlphaBase.hpParamLvMiddle,
-                    friend.paramAlphaBase.hpParamLv99,
-                    levelTrackBar.Value - friend.paramAlphaBase.hpLvMiddleNum,
-                    99 - friend.paramAlphaBase.hpLvMiddleNum)
-                    + friend.GetPromoteStat(wrTrackBar.Value, "hp")) * starBoost)
-                    + hpCosBonus);
-                atkLabel.Text = "Atk: "
-                    + (Math.Ceiling((KF3Parse.Interpolate(
-                    friend.paramAlphaBase.atkParamLvMiddle,
-                    friend.paramAlphaBase.atkParamLv99,
-                    levelTrackBar.Value - friend.paramAlphaBase.hpLvMiddleNum,
-                    99 - friend.paramAlphaBase.hpLvMiddleNum)
-                    + friend.GetPromoteStat(wrTrackBar.Value, "atk")) * starBoost)
-                    + atkCosBonus);
-                defLabel.Text = "Def: "
-                    + (Math.Ceiling((KF3Parse.Interpolate(
-                    friend.paramAlphaBase.defParamLvMiddle,
-                    friend.paramAlphaBase.defParamLv99,
-                    levelTrackBar.Value - friend.paramAlphaBase.hpLvMiddleNum,
-                    99 - friend.paramAlphaBase.hpLvMiddleNum)
-                    + friend.GetPromoteStat(wrTrackBar.Value, "def")) * starBoost)
-                    + defCosBonus);
-            }
+            hp = StolenStuff.CalcParamInternal(levelTrackBar.Value, 99, friend.paramAlphaBase.hpParamLv1, friend.paramAlphaBase.hpParamLv99, friend.paramAlphaBase.hpParamLvMiddle, friend.paramAlphaBase.hpLvMiddleNum);
+            hp = (int)Math.Ceiling((hp + friend.GetPromoteStat(wrTrackBar.Value, "hp")) * starBoost) + hpCosBonus;
+            atk = StolenStuff.CalcParamInternal(levelTrackBar.Value, 99, friend.paramAlphaBase.atkParamLv1, friend.paramAlphaBase.atkParamLv99, friend.paramAlphaBase.atkParamLvMiddle, friend.paramAlphaBase.atkLvMiddleNum);
+            atk = (int)Math.Ceiling((atk + friend.GetPromoteStat(wrTrackBar.Value, "atk")) * starBoost) + atkCosBonus;
+            def = StolenStuff.CalcParamInternal(levelTrackBar.Value, 99, friend.paramAlphaBase.defParamLv1, friend.paramAlphaBase.defParamLv99, friend.paramAlphaBase.defParamLvMiddle, friend.paramAlphaBase.defLvMiddleNum);
+            def = (int)Math.Ceiling((def + friend.GetPromoteStat(wrTrackBar.Value, "def")) * starBoost) + defCosBonus;
+            hpLabel.Text = "Hp: " + hp;
+            atkLabel.Text = "Atk: " + atk;
+            defLabel.Text = "Def: " + def;
+                /* Old method
+                + (Math.Ceiling((KF3Parse.Interpolate(
+                friend.paramAlphaBase.hpParamLvMiddle,
+                friend.paramAlphaBase.hpParamLv99,
+                levelTrackBar.Value - friend.paramAlphaBase.hpLvMiddleNum,
+                99 - friend.paramAlphaBase.hpLvMiddleNum)
+                + friend.GetPromoteStat(wrTrackBar.Value, "hp")) * starBoost)
+                + hpCosBonus);
+                */
+            statusLabel.Text = $"Status: {KF3Parse.CalcStatus(hp, atk, def)}";
         }
 
         public void UpdateFriendCostumes()
         {
             tabControl1.TabPages.Clear();
             int i = 0;
-            foreach (KF3Parse.CharaClothesData clothesData in friend.clothesDatas)
+            foreach (CharaClothesData clothesData in friend.clothesDatas)
             {
                 tabControl1.TabPages.Add(clothesData.name);
                 Bitmap bmp;
 
                 if (!File.Exists(KF3Shared.SharedSettings.guiPath + $"icon_dressup_{ clothesData.id}.png"))
                 {
-                    string link = $"https://sandstar.site/static/kf3_db/Texture2D/icon_dressup/icon_dressup_{clothesData.id}.png";
-                    System.Net.WebRequest request = System.Net.WebRequest.Create(link);
-                    System.Net.WebResponse resp = request.GetResponse();
-                    using (Stream respStream = resp.GetResponseStream())
+                    try
                     {
-                        bmp = new Bitmap(respStream);
-                        bmp.Save(KF3Shared.SharedSettings.guiPath + $"icon_dressup_{ clothesData.id}.png");
+                        string link = $"https://sandstar.site/static/kf3_db/Texture2D/icon_dressup/icon_dressup_{clothesData.id}.png";
+                        System.Net.WebRequest request = System.Net.WebRequest.Create(link);
+                        System.Net.WebResponse resp = request.GetResponse();
+                        using (Stream respStream = resp.GetResponseStream())
+                        {
+                            bmp = new Bitmap(respStream);
+                            bmp.Save(KF3Shared.SharedSettings.guiPath + $"icon_dressup_{ clothesData.id}.png");
+                        }
+                    }
+                    catch
+                    {
+                        bmp = new Bitmap(noData);
                     }
                 }
                 else

@@ -29,7 +29,7 @@ namespace KF3Toolbox
             Console.SetCursorPosition(0, 0);
         }
 
-        static int CalcStatus(int hp, int atk, int def)
+        public static int CalcStatus(int hp, int atk, int def)
         {
             return (int)(0 + hp * 8 / 10 + ((hp * 8 % 10 > 0) ? 1 : 0) + atk * 3 + def * 2);
         }
