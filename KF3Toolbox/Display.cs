@@ -11,7 +11,7 @@ namespace KF3Toolbox
     {
         public StatsBrief DispStats(CharaData friend, bool wiki = false)
         {
-            if (friend.promotePresetDatas.Count < 4)
+            if (friend.promotePresetDatas.Count < 4 || friend.paramAlphaBase == null)
             {
                 throw new Exception();
             }
@@ -116,6 +116,11 @@ namespace KF3Toolbox
 
         public SkillsBrief DispSkills(CharaData friend)
         {
+            if (friend.paramAlphaBase == null)
+            {
+                throw new Exception();
+            }
+
             Console.WriteLine("Loaded Friend: " + friend.id + "_" + friend.nameEn + "\n");
             string output = "";
             //miracle

@@ -39,24 +39,26 @@ namespace KF3Toolbox
 
                     foreach (JProperty p in o.Properties())
                     {
-                        /* Advanced users only
-                        if(p.Name == "bannerName")
+                        if (p.Name == "bannerName")
                         {
-                            if(p.Value.ToString() != "")
+                            if (p.Value.ToString() != "")
                             {
-                                if (openFile == "BANNER_DATA" && !File.Exists(SharedSettings.exportPath + "homeBanner\\" + EpochToPrefix(o.Property("startTime").Value.ToString()) + "_" + p.Value + ".png"))
+                                if (openFile == "BANNER_DATA")
                                 {
-                                    string link = SharedServers.cdn + "Texture2D/HomeBanner/home_banner_" + p.Value + ".png";
-                                    using (WebClient client = new WebClient())
+                                    if (EpochToKF3Time((long)o.Property("endTime").Value) >= DateTime.Now && !File.Exists(SharedSettings.exportPath + "homeBanner\\" + EpochToPrefix(o.Property("startTime").Value.ToString()) + "_" + p.Value + "_" + EpochToPrefix(o.Property("endTime").Value.ToString()) + ".png"))
                                     {
-                                        try
+                                        string link = SharedServers.cdn + "Texture2D/HomeBanner/home_banner_" + p.Value + ".png";
+                                        using (WebClient client = new WebClient())
                                         {
-                                            client.DownloadFile(link, SharedSettings.exportPath + "homeBanner\\" + EpochToPrefix(o.Property("startTime").Value.ToString()) + "_" + p.Value + ".png");
-                                        }
-                                        catch
-                                        {
-                                            Console.WriteLine(SharedServers.cdn + "Texture2D/HomeBanner/home_banner_" + p.Value + ".png");
-                                            Console.WriteLine("banner not found");
+                                            try
+                                            {
+                                                client.DownloadFile(link, SharedSettings.exportPath + "homeBanner\\" + EpochToPrefix(o.Property("startTime").Value.ToString()) + "_" + p.Value + ".png");
+                                            }
+                                            catch
+                                            {
+                                                Console.WriteLine(SharedServers.cdn + "Texture2D/HomeBanner/home_banner_" + p.Value + ".png");
+                                                Console.WriteLine("banner not found");
+                                            }
                                         }
                                     }
                                 }
@@ -66,25 +68,27 @@ namespace KF3Toolbox
                         {
                             if (p.Value.ToString() != "")
                             {
-                                if (openFile == "GACHA_DATA" && !File.Exists(SharedSettings.exportPath + "gachaBanner\\" + EpochToPrefix(o.Property("startDatetime").Value.ToString()) + "_" + p.Value + ".png"))
+                                if (openFile == "GACHA_DATA")
                                 {
-                                    string link = SharedServers.cdn + "Texture2D/GachaTop/" + p.Value + ".png";
-                                    using (WebClient client = new WebClient())
+                                    if (EpochToKF3Time((long)o.Property("endDatetime").Value) >= DateTime.Now && !File.Exists(SharedSettings.exportPath + "gachaBanner\\" + EpochToPrefix(o.Property("startDatetime").Value.ToString()) + "_" + p.Value + "_" + EpochToPrefix(o.Property("endDatetime").Value.ToString()) + ".png"))
                                     {
-                                        try
+                                        string link = SharedServers.cdn + "Texture2D/GachaTop/" + p.Value + ".png";
+                                        using (WebClient client = new WebClient())
                                         {
-                                            client.DownloadFile(link, SharedSettings.exportPath + "gachaBanner\\" + EpochToPrefix(o.Property("startDatetime").Value.ToString()) + "_" + p.Value + ".png");
-                                        }
-                                        catch
-                                        {
-                                            Console.WriteLine(SharedServers.cdn + "Texture2D/GachaTop/" + p.Value + ".png");
-                                            Console.WriteLine("banner not found");
+                                            try
+                                            {
+                                                client.DownloadFile(link, SharedSettings.exportPath + "gachaBanner\\" + EpochToPrefix(o.Property("startDatetime").Value.ToString()) + "_" + p.Value + ".png");
+                                            }
+                                            catch
+                                            {
+                                                Console.WriteLine(SharedServers.cdn + "Texture2D/GachaTop/" + p.Value + ".png");
+                                                Console.WriteLine("banner not found");
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
-                        */
                         sw.Write($"{p.Value.ToString().Replace("\n", " ")};");
                     }
                     sw.WriteLine();

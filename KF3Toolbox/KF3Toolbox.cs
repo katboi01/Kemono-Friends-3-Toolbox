@@ -186,7 +186,7 @@ namespace KF3Toolbox
                     {
                         case "1": Console.Clear(); try { DispStats(loadedFriend, false); } catch { Console.WriteLine("failed"); } break;
                         case "2": Console.Clear(); DispFacts(ref loadedFriend, false); break;
-                        case "3": Console.Clear(); DispSkills(loadedFriend); break;
+                        case "3": Console.Clear(); try { DispSkills(loadedFriend); } catch { Console.WriteLine("failed"); } break;
                         case "4": Console.Clear(); DispPromoteItems(ref loadedFriend, false); break;
                         case "5": Console.Clear(); friendLoaded = false; break;
                         case "6": Console.Clear(); ExportFriend(loadedFriend, true); break;
