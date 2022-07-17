@@ -5,13 +5,9 @@ A (mostly) console application that aids in extracting useful information from K
 
 -KF3 DMM installed and playable
 
--A file extracted with https://github.com/Perfare/AssetStudio, detailed instructions are inside the program
-
 ## It can:
 
 -List all friends in cache with their id's
-
--Calculate Friend stats depending on level, stars, WR (GUI mode)
 
 -View information about friends, including min/max stats, skills, trivia, upgrade materials
 
