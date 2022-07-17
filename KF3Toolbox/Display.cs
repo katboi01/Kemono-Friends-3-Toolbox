@@ -153,9 +153,9 @@ public partial class KF3Parse
         }
         //abilities
         Console.WriteLine("\n" + "Unique Trait: " + friend.ParamAbility.abilityName + "\n" + friend.ParamAbility.abilityEffect);
-        if (friend.ParamAbility != null)
+        if (friend.ParamAbility2 != null)
         {
-            Console.WriteLine("\n" + "Miracle Trait: " + friend.ParamAbility.abilityName + "\n" + friend.ParamAbility.abilityEffect);
+            Console.WriteLine("\n" + "Miracle Trait: " + friend.ParamAbility2.abilityName + "\n" + friend.ParamAbility2.abilityEffect);
         }
         //wait
         Console.WriteLine("\n" + "Standby Skill: " + friend.ParamWaitAction.skillName + "\n" + friend.ParamWaitAction.skillEffect);
@@ -179,8 +179,8 @@ public partial class KF3Parse
             WaitName = friend.ParamWaitAction.skillName,
             WaitDesc = friend.ParamWaitAction.skillEffect,
 
-            Ability1Name = friend.ParamAbility?.abilityName,
-            Ability1Desc = friend.ParamAbility?.abilityEffect,
+            Ability1Name = friend.ParamAbility2?.abilityName,
+            Ability1Desc = friend.ParamAbility2?.abilityEffect,
             AbilityName = friend.ParamAbility.abilityName,
             AbilityDesc = friend.ParamAbility.abilityEffect
         };
@@ -343,8 +343,8 @@ public partial class KF3Parse
         "|standbyskill=" + friend.ParamWaitAction.skillEffect + "\n" +
         "|unique=" + friend.ParamAbility.abilityName + "\n" +
         "|uniqueskill=" + friend.ParamAbility.abilityEffect + "\n" +
-        "|miracletrait=" + friend.ParamAbility?.abilityName + "\n" +
-        "|miracletraitskill=" + friend.ParamAbility?.abilityEffect + "\n";
+        "|miracletrait=" + friend.ParamAbility2?.abilityName + "\n" +
+        "|miracletraitskill=" + friend.ParamAbility2?.abilityEffect + "\n";
 
 
         string cos = "\n|cos = ";
