@@ -113,6 +113,7 @@ public partial class KF3Parse
             {
                 Console.WriteLine("export failed: " + data.id + " " + data.name);
             }
+            //DispSkills(data, true);
         }
     }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using static StolenStuff.CharaDef;
 
 public partial class KF3Parse
 {
@@ -84,33 +85,144 @@ public partial class KF3Parse
 
     void DispPhoto(PhotoData photo, bool wiki)
     {
-        if (wiki) { Console.Out.Close(); sw = new StreamWriter(SharedSettings.exportPath + "photos\\" + "Photo_" + photo.id + ".txt", false); Console.SetOut(sw); }
+        string photoSource = photo.id switch
+        {
+            < 5000 => "Gacha",
+            5000 => "Event/Shop",
+            > 5000 and < 6000 => "Gacha",
+            6000 => "Event/Shop",
+            > 6000 and < 7000 => "Friend Story",
+            > 7000 and < 7500 => "Main Story",
+            7501 or 7502 => "Labyrinth",
+            7503 or 7504 => "Event/Shop",
+            _ => "Missing"
+        };
+
+        string categorySymbol = photo.type switch
+        {
+            1 => "{{KF3PhotoPaw}}",
+            2 => "{{KF3PhotoStar}}",
+            _ => ""
+        };
+
+        string categoryName = photo.type switch
+        {
+            1 => "Passive",
+            2 => "Conditional",
+            _ => "Missing"
+        };
+
+        string limited = photo.id switch
+        {
+            <= 6000 => "Yes",
+            > 6000 => "No",
+        };
+
+        string rarity = photo.rarity switch
+        {
+            1 => "One",
+            2 => "Two",
+            3 => "Three",
+            4 => "Four",
+            _ => "Missing"
+        };
+
+        string outputString = string.Join("\n",
+            "{{PhotoBox",
+            $"|photoimage= KF3.png",
+            $"|photoupgrade= KF3+.png",
+            $"|rarity= {{{{KF3{photo.rarity}Star}}}}",
+            photo.type <= 2 ? $"|type= {categorySymbol} {categoryName}" : null,
+            $"|from= {photoSource}",
+            $"|illus= {photo.illustratorName}",
+            $"|limited= {limited}",
+            $"|jpcardname= {photo.name}",
+            $"|ID= {photo.id}",
+            $"|stamina= {photo.hpParamLv1}",
+            $"|maxstamina= {photo.hpParamLvMax}",
+            $"|attack= {photo.atkParamLv1}",
+            $"|maxattack= {photo.atkParamLvMax}",
+            $"|defense= {photo.defParamLv1}",
+            $"|maxdefense= {photo.defParamLvMax}",
+            photo.preEffect != null? $"|basetrait= {GeneratePhotoEffect(photo.preEffect)}" : null,
+            photo.postEffect != null ? $"|upgradetrait= {GeneratePhotoEffect(photo.postEffect)}" : null,
+            $"|story= {photo.flavorTextBefore}",
+            $"|upgradestory= {photo.flavorTextAfter}",
+            $"|update= {EpochToKF3Time(long.Parse(photo.startTime)).ToString("D")}: Added to [[Kemono Friends 3]].",
+            //$"|strategy= -",
+            "}}",
+            $"[[Category:{rarity} Star Photos]]{(photo.type <= 2? $" [[Category:{categoryName} Photos]] " : " ")}[[Category:Photos (KF3)]] [[Category:Illustrated by {photo.illustratorName}]]"
+            );
+
+        if (!wiki)
+        {
+            Console.WriteLine(outputString);
+            Console.WriteLine();
+            Console.WriteLine(GeneratePhotoEffect(photo.preEffect));
+        }
         else
         {
-            Console.Clear();
-            Console.WriteLine("Loaded Photo: " + photo.id + "_" + photo.name + "\n");
+            File.WriteAllText(Path.Combine(SharedSettings.exportPath, "photos", $"Photo_{photo.id}.txt"), outputString);
         }
-        Console.Write("name: " + photo.name + "\nphoto effect: " + (photo.preEffect != null? photo.preEffect.abilityEffect : "no effect" ) + "\nupgraded effect: " + (photo.postEffect != null ? photo.postEffect.abilityEffect : "no effect") + "\n\n" + photo.flavorTextBefore + "\n\n" + photo.flavorTextAfter + "\n\n");
-        //stats
-        Console.WriteLine("\n" + "Base stats:");
-        Console.WriteLine($"Hp: {photo.hpParamLv1}");
-        Console.WriteLine($"Atk: {photo.atkParamLv1}");
-        Console.WriteLine($"Def: {photo.defParamLv1}");
-        Console.WriteLine("\n" + "Max stats:");
-        Console.WriteLine($"Hp: {photo.hpParamLvMax}");
-        Console.WriteLine($"Atk: {photo.atkParamLvMax}");
-        Console.WriteLine($"Def: {photo.defParamLvMax}");
-        if (wiki)
-        {
-            Console.Out.Close(); sw = new StreamWriter(Console.OpenStandardOutput())
-            {
-                AutoFlush = true
-            }; Console.SetOut(sw);
-        }
-
     }
 
-    public SkillsBrief DispSkills(CharaData friend)
+    public SkillsBrief DispSkills(CharaData friend, bool wiki = false)
+    {
+        if (friend.ParamAlphaBase == null)
+        {
+            throw new Exception();
+        }
+
+        SkillsBrief sb = new SkillsBrief();
+        string output = "Loaded Friend: " + friend.id + "_" + friend.nameEn + "\n\n";
+
+        sb.MiracleName = friend.ParamArts.actionName;
+        sb.MiracleDesc = GenerateCharaDamageEffect(friend.ParamArts.damageList) + "\n" + GenerateCharaBuffEffect(friend.ParamArts.buffList);
+        sb.MiracleType = friend.ParamArts.authParam.SynergyFlag;
+
+        output += $"Miracle Name: {sb.MiracleName}\n{sb.MiracleDesc}\n\n";
+
+        List<string> miracleValues = FillMiracleNumbers(friend);
+        for (int i = 0; i < miracleValues.Count(); i++)
+        {
+            output += $"Lvl {i + 1}: {miracleValues[i]}\n";
+        }
+
+        output += "\n";
+
+        sb.MiracleMax = miracleValues[4];
+
+        //abilities
+        sb.AbilityName = friend.ParamAbility.abilityName;
+        sb.AbilityDesc = GenerateAbilityBuffEffects(friend.ParamAbility.buffList);
+        output += $"Unique Trait: {sb.AbilityName}\n{sb.AbilityDesc}\n\n";
+
+        if (friend.ParamAbility2 != null)
+        {
+            sb.Ability1Name = friend.ParamAbility2.abilityName;
+            sb.Ability1Desc = GenerateAbilityBuffEffects(friend.ParamAbility2.buffList);
+            output += $"Miracle Trait: {sb.Ability1Name}\n{sb.Ability1Desc}\n\n";
+        }
+
+        //wait
+        sb.WaitName = friend.ParamWaitAction.skillName;
+        sb.WaitDesc = $"{GenerateCharaBuffEffect(friend.ParamWaitAction.buffList)}\n{friend.ParamWaitAction.activationRate}% chance, {friend.ParamWaitAction.activationNum} times";
+        output += $"Standby Skill: {sb.WaitName}\n{sb.WaitDesc}\n\n";
+
+        //special
+        sb.BeatName = friend.ParamSpecialAttack.actionName;
+        sb.BeatDesc = GenerateCharaDamageEffect(friend.ParamSpecialAttack.damageList) + "\n" + GenerateCharaBuffEffect(friend.ParamSpecialAttack.buffList);
+        output += $"Special Attack: {sb.BeatName}\n{sb.BeatDesc}";
+        Console.WriteLine(output);
+        if (wiki)
+        {
+            Directory.CreateDirectory(SharedSettings.exportPath + "generated/");
+            File.WriteAllText(SharedSettings.exportPath + "generated/" + friend.nameEn.Trim() + "_" + friend.id + ".txt", output);
+        }
+        return sb;
+    }
+
+    public SkillsBrief DispSkills2(CharaData friend)
     {
         if (friend.ParamAlphaBase == null)
         {
@@ -126,7 +238,7 @@ public partial class KF3Parse
         Console.WriteLine("Miracle Variable    | lvl1  |  lvl2  |  lvl3  |  lvl4  |  lvl5  |  Miracle+");
         for (int i = 0; i < friend.ParamArts.damageList.Count; i++)
         {
-            ParamArts.DamageList damage = friend.ParamArts.damageList[i];
+            ParamArts.CharaDamageParam damage = friend.ParamArts.damageList[i];
             Console.WriteLine($"DAMAGE{i}:          | " + Math.Round(100 * damage.damageRate)
                 + "  |  " + Math.Round(100 * (damage.damageRate * (1 + 1 * damage.growthRate)))
                 + "  |  " + Math.Round(100 * (damage.damageRate * (1 + 2 * damage.growthRate)))
@@ -136,7 +248,7 @@ public partial class KF3Parse
         }
         for (int i = 0; i < friend.ParamArts.buffList.Count; i++)
         {
-            ParamArts.BuffList buff = friend.ParamArts.buffList[i];
+            ParamArts.CharaBuffParam buff = friend.ParamArts.buffList[i];
             Console.WriteLine($"BUFF{i}:             | " + Math.Round(100 - 100 * buff.coefficient)
                 + "  |  " + Math.Round(100 - 100 * (buff.coefficient * (1 + 1 * buff.growthRate)))
                 + "  |  " + Math.Round(100 - 100 * (buff.coefficient * (1 + 2 * buff.growthRate)))
@@ -161,7 +273,7 @@ public partial class KF3Parse
         Console.WriteLine("\n" + "Standby Skill: " + friend.ParamWaitAction.skillName + "\n" + friend.ParamWaitAction.skillEffect);
         //special
         Console.WriteLine("\n" + "Special Attack: " + friend.ParamSpecialAttack.actionName + "\n" + friend.ParamSpecialAttack.actionEffect);
-        foreach (ParamSpecialAttack.BuffList buff in friend.ParamSpecialAttack.buffList)
+        foreach (ParamArts.CharaBuffParam buff in friend.ParamSpecialAttack.buffList)
         {
             Console.WriteLine($"\n Turns: {buff.turn} Activation rate: {buff.successRate}%");
         }
@@ -185,6 +297,7 @@ public partial class KF3Parse
             AbilityDesc = friend.ParamAbility.abilityEffect
         };
     }
+
     void DispFacts(ref CharaData friend, bool wiki)
     {
         if (wiki) { Console.Out.Close(); sw = new StreamWriter(SharedSettings.exportPath + friend.nameEn + "_" + friend.id + ".txt", true); Console.SetOut(sw); Console.WriteLine("\n I N F O\n"); }
@@ -419,5 +532,501 @@ public partial class KF3Parse
 
         if (wiki) { File.WriteAllText(SharedSettings.exportPath + "wiki/" + friend.nameEn.Trim() + "_" + friend.id + "_wiki.txt", outputString); }
         return true;
+    }
+
+    public static string GeneratePhotoEffect(ParamAbility abilityData)
+    {
+        string outputString = GenerateAbilityBuffEffects(abilityData.buffList);
+        foreach (ParamAbility.GutsList guts in abilityData.gutsList)
+        {
+            outputString += $"Revives you when you are defeated {guts.numOfTimes} times.";
+        }
+        return outputString;
+    }
+
+    public static string GenerateAbilityBuffEffects(List<ParamAbility.BuffList> buffs)
+    {
+        List<string[]> outputArr = new List<string[]>();
+        for(int i = 0; i < buffs.Count; i++)
+        {
+            string[] entry = new string[3];
+            var buff = buffs[i];
+            string subString = "";
+            int conditionCount = 0;
+            if (!(buff.condition == ConditionType.BELOW && buff.conditionHpRate == 100) && !(buff.condition == ConditionType.ABOVE && buff.conditionHpRate == 0))
+            {
+                string healthDesc = buff.condition switch
+                {
+                    ConditionType.ABOVE => "above",
+                    ConditionType.BELOW => "below",
+                    ConditionType.EQUAL => "at",
+                    _ => ""
+                };
+                subString += $"{(conditionCount > 0 ? ", and" : "When")} health is {healthDesc} {buff.conditionHpRate}%";
+                conditionCount++;
+            }
+            if ((int)buff.traitsTerrain != -1)
+            {
+                subString += $"{(conditionCount > 0 ? ", and" : "When")} arena is {buff.traitsTerrain}";
+                conditionCount++;
+            }
+            if (buff.enemyNum > 0)
+            {
+                string cond = buff.conditionEnemyNum switch
+                {
+                    ConditionType.ABOVE => "or more",
+                    ConditionType.BELOW => "or less",
+                    ConditionType.EQUAL => "",
+                    _ => ""
+                };
+                subString += $"{(conditionCount > 0 ? ", and" : "When")} {buff.enemyNum} {cond} enemies are alive";
+                conditionCount++;
+            }
+            if (buff.mysideNum > 0)
+            {
+                string cond = buff.conditionMysideNum switch
+                {
+                    ConditionType.ABOVE => "or more",
+                    ConditionType.BELOW => "or less",
+                    ConditionType.EQUAL => "",
+                    _ => ""
+                };
+                subString += $"{(conditionCount > 0 ? ", and" : "When")} {buff.mysideNum} {cond} Friends are alive";
+                conditionCount++;
+            }
+            if ((int)buff.traitsTimezone != -1)
+            {
+                subString += $"{(conditionCount > 0 ? ", and" : "When")} it's nighttime";
+                conditionCount++;
+            }
+            if ((int)buff.waveEnemyMask != -1) 
+                subString += $"{(conditionCount > 0 ? ", and" : "When")} enemy is {GetEnemyMaskEn(buff.waveEnemyMask)}";
+
+            entry[0] = subString; subString = "";
+
+            string buffDescription = $"{GetBuffNameEn(buff.buffType)}";
+            double buffCoefficient = Math.Round(buff.coefficient * 100, 2);
+
+            if (buff.abnormalType != 0)
+            {
+                buffDescription += $" {GetAbnormalTypeEn(buff.abnormalType)}";
+            }
+            if (buff.abnormalType2 != 0)
+            {
+                buffDescription += $" {GetAbnormalTypeEn(buff.abnormalType2)}";
+            }
+
+            if (buff.increment != 0)
+            {
+                buffDescription += $" {buff.increment}";
+            }
+            if (buff.coefficient != 0)
+            {
+                buffDescription += $" {buffCoefficient}%";
+            }
+
+            buffDescription = $"{buffDescription} to {GetTargetTypeEn(buff.targetType)}";
+
+            entry[1] = buffDescription;
+
+            string targetDescription = "";
+
+            conditionCount = 0;
+            if ((int)buff.attributeMask != -1)
+            {
+                targetDescription += $", when attribute is {GetAttributeNameEn(buff.attributeMask)}";
+                conditionCount++;
+            }
+
+            if (buff.spAttributeMask != 0 || buff.spEnemyMask != 0 || buff.spHealthMask != 0)
+            {
+                if (conditionCount > 0) targetDescription += ",";
+                targetDescription += " against";
+                if (buff.spAttributeMask != 0)
+                {
+                    targetDescription += $" {GetAttributeNameEn(buff.spAttributeMask)}";
+                }
+                if (buff.spEnemyMask != 0)
+                {
+                    targetDescription += $" {GetEnemyMaskEn(buff.spEnemyMask)}";
+                }
+                targetDescription += " enemies";
+                if (buff.spHealthMask != 0)
+                {
+                    targetDescription += $" affected by ({GetHealthMaskEn(buff.spHealthMask)})";
+                }
+            }
+            if (buff.giveupReuseNum > 0)
+            {
+                targetDescription += $", when ally is defeated ({buff.giveupReuseNum} times)";
+            }
+            if (buff.waveReuseNum > 0)
+            {
+                targetDescription += $" at the start of each wave ({buff.waveReuseNum+1} times)";
+            }
+            else
+            {
+                //targetDescription += $" (single activation)";
+            }
+
+            entry[2] = targetDescription;
+
+            outputArr.Add(entry);
+        }
+
+        string outputString = "";
+        for (int i = 0; i < outputArr.Count; i++)
+        {
+            bool conditionsMatchPrev = i > 0 && outputArr[i][0] == outputArr[i - 1][0] && outputArr[i][2] == outputArr[i - 1][2];
+            bool conditionsMatchNext = i < outputArr.Count-1 && outputArr[i][0] == outputArr[i + 1][0] && outputArr[i][2] == outputArr[i + 1][2];
+
+            bool combined = false;
+
+            if(conditionsMatchPrev)
+            {
+                outputString += $" and ";
+                combined = true;
+            }
+            else
+            {
+                outputString += $"{outputArr[i][0]}";
+            }
+
+            if (string.IsNullOrEmpty(outputArr[i][0]) && !combined)
+            {
+                outputString += $"Applies {outputArr[i][1]}";
+            }
+            else
+            {
+                if (combined)
+                {
+                    outputString += $"{outputArr[i][1]}";
+                }
+                else
+                {
+                    outputString += $", applies {outputArr[i][1]}";
+                }
+            }
+
+            if (!conditionsMatchNext)
+            {
+                if (i == buffs.Count - 1)
+                {
+                    outputString += $"{outputArr[i][2]}.";
+                }
+                else
+                {
+                    outputString += $"{outputArr[i][2]}.\n";
+                }
+            }
+        }
+
+        return outputString;
+    }
+
+    public static string DecideVariable(ParamArts.CharaBuffParam buff, int id)
+    {
+        if (!buff.isGrow)
+        {
+            return "";
+        }
+        else
+        {
+            if(buff.coefficient == 0)
+            {
+                return $"[INCREMENT{id}]";
+            }
+            else
+            {
+                return $"[BUFF{id}]";
+            }
+        }
+    }
+
+    public static string DecideVariable(ParamArts.CharaDamageParam buff, int id)
+    {
+        if (!buff.isGrow)
+        {
+            return "";
+        }
+        else
+        {
+            return $"[DAMAGE{id}]";
+        }
+    }
+
+    public static string GenerateCharaBuffEffect(List<ParamArts.CharaBuffParam> buffs)
+    {
+        List<string[]> outputArr = new List<string[]>();
+        for (int i = 0; i < buffs.Count; i++)
+        {
+            string[] entry = new string[3];
+            var buff = buffs[i];
+            string subString = "";
+            int conditionCount = 0;
+            if ((int)buff.attributeMask != -1)
+            {
+                subString += $"When attribute is {GetAttributeNameEn(buff.attributeMask)}";
+                conditionCount++;
+            }
+            if ((int)buff.traitsTerrain != -1)
+            {
+                subString += $"{(conditionCount > 0 ? ", and" : "When")} arena is {buff.traitsTerrain}";
+                conditionCount++;
+            }
+            if (buff.enemyNum > 0)
+            {
+                string cond = buff.conditionEnemyNum switch
+                {
+                    ConditionType.ABOVE => "or more",
+                    ConditionType.BELOW => "or less",
+                    ConditionType.EQUAL => "",
+                    _ => ""
+                };
+                subString += $"{(conditionCount > 0 ? ", and" : "When")} {buff.enemyNum} {cond} enemies are alive";
+                conditionCount++;
+            }
+            if (buff.mysideNum > 0)
+            {
+                string cond = buff.conditionMysideNum switch
+                {
+                    ConditionType.ABOVE => "or more",
+                    ConditionType.BELOW => "or less",
+                    ConditionType.EQUAL => "",
+                    _ => ""
+                };
+                subString += $"{(conditionCount > 0 ? ", and" : "When")} {buff.mysideNum} {cond} Friends are alive";
+                conditionCount++;
+            }
+            if ((int)buff.waveEnemyMask != -1)
+                subString += $"{(conditionCount > 0 ? ", and" : "When")} enemy is {GetEnemyMaskEn(buff.waveEnemyMask)}";
+
+            entry[0] = subString; subString = "";
+
+            string buffDescription = $"{GetBuffNameEn(buff.buffType)}";
+
+            if (buff.abnormalType != 0)
+            {
+                buffDescription += $" {GetAbnormalTypeEn(buff.abnormalType)}";
+            }
+            if (buff.abnormalType2 != 0)
+            {
+                buffDescription += $" {GetAbnormalTypeEn(buff.abnormalType2)}";
+            }
+
+            string variableType = DecideVariable(buff, i);
+            if (string.IsNullOrEmpty(variableType))
+            {
+                if (buff.increment != 0)
+                    variableType = $" ({buff.increment})";
+                else if (buff.coefficient != 0)
+                    variableType = $" ({Math.Round(buff.coefficient * 100)})";
+            }
+            else
+                variableType = " " + variableType;
+
+            string successRate = buff.successRate == 100 ? "" : $" ({buff.successRate}% chance)";
+
+            buffDescription = $"{buffDescription}{variableType}{successRate} to {GetTargetTypeEn(buff.targetType)}";
+            if (buff.turn > 1)
+                buffDescription += $" for {buff.turn} turns";
+
+            entry[1] = buffDescription;
+
+            string targetDescription = "";
+            if (buff.spAttributeMask != 0 || buff.spEnemyMask != 0 || buff.spHealthMask != 0)
+            {
+                targetDescription = " against";
+                if (buff.spAttributeMask != 0)
+                {
+                    targetDescription += $" {GetAttributeNameEn(buff.spAttributeMask)}";
+                }
+                if (buff.spEnemyMask != 0)
+                {
+                    targetDescription += $" {GetEnemyMaskEn(buff.spEnemyMask)}";
+                }
+                targetDescription += " enemies";
+                if (buff.spHealthMask != 0)
+                {
+                    targetDescription += $" affected by ({GetHealthMaskEn(buff.spHealthMask)})";
+                }
+            }
+            if (buff.giveupReuseNum > 0)
+            {
+                targetDescription += $", when ally is defeated ({buff.giveupReuseNum} times)";
+            }
+
+            entry[2] = targetDescription;
+
+            outputArr.Add(entry);
+        }
+
+        string outputString = "";
+        for (int i = 0; i < outputArr.Count; i++)
+        {
+            bool conditionsMatchPrev = i > 0 && outputArr[i][0] == outputArr[i - 1][0] && outputArr[i][2] == outputArr[i - 1][2];
+            bool conditionsMatchNext = i < outputArr.Count - 1 && outputArr[i][0] == outputArr[i + 1][0] && outputArr[i][2] == outputArr[i + 1][2];
+
+            bool combined = false;
+
+            if (conditionsMatchPrev && (i == outputArr.Count - 1 || conditionsMatchNext))
+            {
+                outputString += $" and ";
+                combined = true;
+            }
+            else if (i == 0)
+            {
+                outputString += $"{outputArr[i][0]}";
+            }
+            else
+            {
+                outputString += $"\n{outputArr[i][0]}";
+            }
+
+            if (string.IsNullOrEmpty(outputArr[i][0]) && !combined)
+            {
+                outputString += $"Applies {outputArr[i][1]}";
+            }
+            else
+            {
+                if (combined)
+                {
+                    outputString += $"{outputArr[i][1]}";
+                }
+                else
+                {
+                    outputString += $", applies {outputArr[i][1]}";
+                }
+            }
+
+            if (!conditionsMatchNext)
+            {
+                outputString += $"{outputArr[i][2]}.";
+            }
+        }
+
+        return outputString;
+    }
+
+    public static string GenerateCharaDamageEffect(List<ParamArts.CharaDamageParam> buffs)
+    {
+        List<string[]> outputArr = new List<string[]>();
+        for (int i = 0; i < buffs.Count; i++)
+        {
+            string[] entry = new string[3];
+            var buff = buffs[i];
+            string subString = "";
+            int conditionCount = 0;
+            if (buff.enemyNum > 0)
+            {
+                string cond = buff.conditionEnemyNum switch
+                {
+                    ConditionType.ABOVE => "or more",
+                    ConditionType.BELOW => "or less",
+                    ConditionType.EQUAL => "",
+                    _ => ""
+                };
+                subString += $"{(conditionCount > 0 ? ", and" : "When")} {buff.enemyNum} {cond} enemies are alive";
+                conditionCount++;
+            }
+            if (buff.mysideNum > 0)
+            {
+                string cond = buff.conditionMysideNum switch
+                {
+                    ConditionType.ABOVE => "or more",
+                    ConditionType.BELOW => "or less",
+                    ConditionType.EQUAL => "",
+                    _ => ""
+                };
+                subString += $"{(conditionCount > 0 ? ", and" : "When")} {buff.mysideNum} {cond} Friends are alive";
+                conditionCount++;
+            }
+
+            entry[0] = subString; subString = "";
+
+            string variableType = DecideVariable(buff, i);
+            if (string.IsNullOrEmpty(variableType))
+            {
+                variableType = $"{Math.Round(buff.damageRate * 100)}";
+            }
+
+            string buffDescription = $"{buff.hitNum} * {variableType} damage to {GetTargetTypeEn(buff.targetType)}";
+
+            entry[1] = buffDescription;
+
+            string targetDescription = "";
+
+            if((int)buff.attributeMask != -1 || (int)buff.waveEnemyMask != -1 || (int)buff.targetMask != -1 || (int)buff.healthMask != -1)
+            {
+                targetDescription = " against";
+                if ((int)buff.attributeMask != -1)
+                {
+                    targetDescription += $" {GetAttributeNameEn(buff.attributeMask)}";
+                }
+                if ((int)buff.waveEnemyMask != -1)
+                {
+                    targetDescription += $" {GetEnemyMaskEn(buff.waveEnemyMask)}";
+                }
+                if ((int)buff.targetMask != -1)
+                {
+                    targetDescription += $" {GetEnemyMaskEn(buff.targetMask)}";
+                }
+                targetDescription += " enemies";
+                if ((int)buff.healthMask != -1)
+                {
+                    targetDescription += $" affected by ({GetHealthMaskEn(buff.healthMask)})";
+                }
+            }
+
+            entry[2] = targetDescription;
+
+            outputArr.Add(entry);
+        }
+
+        string outputString = "";
+        for (int i = 0; i < outputArr.Count; i++)
+        {
+            bool conditionsMatchPrev = i > 0 && outputArr[i][0] == outputArr[i - 1][0] && outputArr[i][2] == outputArr[i - 1][2];
+            bool conditionsMatchNext = i < outputArr.Count - 1 && outputArr[i][0] == outputArr[i + 1][0] && outputArr[i][2] == outputArr[i + 1][2];
+
+            bool combined = false;
+
+            if (conditionsMatchPrev && (i == outputArr.Count - 1 || conditionsMatchNext))
+            {
+                outputString += $" and ";
+                combined = true;
+            }
+            else if (i == 0)
+            {
+                outputString += $"{outputArr[i][0]}";
+            }
+            else
+            {
+                outputString += $"\n{outputArr[i][0]}";
+            }
+
+            if (string.IsNullOrEmpty(outputArr[i][0]) && !combined)
+            {
+                outputString += $"Deal {outputArr[i][1]}";
+            }
+            else
+            {
+                if (combined)
+                {
+                    outputString += $"{outputArr[i][1]}";
+                }
+                else
+                {
+                    outputString += $", deal {outputArr[i][1]}";
+                }
+            }
+
+            if (!conditionsMatchNext)
+            {
+                outputString += $"{outputArr[i][2]}.";
+            }
+        }
+
+        return outputString;
     }
 }

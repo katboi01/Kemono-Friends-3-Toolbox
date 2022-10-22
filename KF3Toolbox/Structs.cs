@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static StolenStuff;
 
 public partial class KF3Parse
 {
@@ -242,7 +243,7 @@ public partial class KF3Parse
         public string abilityName;
         public string abilityEffect;
         public List<BuffList> buffList;
-        public List<object> gutsList;
+        public List<GutsList> gutsList;
 
         public class MGameObject
         {
@@ -258,26 +259,44 @@ public partial class KF3Parse
 
         public class BuffList
         {
-            public string infoMessage;
-            public int infoTime;
-            public int condition;
-            public int conditionHpRate;
-            public int attributeMask;
-            public int waveEnemyMask;
-            public int healthMask;
-            public int traitsTerrain;
-            public int traitsTimezone;
-            public int targetType;
-            public int breakElement;
-            public int buffType;
-            public int abnormalType;
-            public int spAttributeMask;
-            public int spHealthMask;
-            public int spEnemyMask;
-            public int waveReuseNum;
-            public int turn;
-            public float coefficient;
-            public int increment;
+            public string infoMessage ;
+            public int infoTime ;
+            public CharaDef.ConditionType condition;
+            public int conditionHpRate ;
+            public int enemyNum ;
+            public CharaDef.ConditionType conditionEnemyNum ;
+            public int mysideNum ;
+            public CharaDef.ConditionType conditionMysideNum ;
+            public CharaDef.AttributeMask attributeMask ;
+            public CharaDef.EnemyMask waveEnemyMask ;
+            public CharaDef.HealthMask healthMask ;
+            public CharaDef.HealthMaskType healthMaskType ;
+            public CharaDef.AbilityTraits traitsTerrain ;
+            public CharaDef.AbilityTraits2 traitsTimezone ;
+            public CharaDef.ActionTargetType targetType ;
+            public CharaDef.EnemyMask targetMask;
+            public CharaDef.ActionBuffType buffType;
+            public CharaDef.ActionAbnormalMask abnormalType;
+            public CharaDef.ActionAbnormalMask2 abnormalType2;
+            public CharaDef.AttributeMask spAttributeMask;
+            public CharaDef.HealthMask spHealthMask;
+            public CharaDef.EnemyMask spEnemyMask;
+            public int waveReuseNum ;
+            public int giveupReuseNum ;
+            public int turn ;
+            public int sucheduledTurn ;
+            public double coefficient ;
+            public int increment ;
+        }
+
+        public class GutsList
+        {
+            public CharaDef.AttributeMask attributeMask;
+            public CharaDef.AbilityTraits traitsTerrain;
+            public CharaDef.AbilityTraits2 traitsTimezone;
+            public CharaDef.ActionTargetType targetType;
+            public bool breakElement;
+            public int numOfTimes;
         }
     }
     public class ParamAlphaBase
@@ -335,8 +354,8 @@ public partial class KF3Parse
         public AuthParam authParam { get; set; }
         public ActionParam actionParam { get; set; }
         public MotionParam motionParam { get; set; }
-        public List<DamageList> damageList { get; set; }
-        public List<BuffList> buffList { get; set; }
+        public List<CharaDamageParam> damageList { get; set; }
+        public List<CharaBuffParam> buffList { get; set; }
 
         public class AuthParam
         {
@@ -386,23 +405,30 @@ public partial class KF3Parse
             public float hitStartOffsetTime { get; set; }
             public float effectStartTime { get; set; }
         }
-        public class DamageList
+        public class CharaDamageParam
         {
-            public int attributeMask { get; set; }
-            public int waveEnemyMask { get; set; }
-            public int healthMask { get; set; }
-            public int targetType { get; set; }
-            public int breakElement { get; set; }
-            public float damageRate { get; set; }
-            public int hitNum { get; set; }
-            public float hitInterval { get; set; }
-            public int dispObjectOnce { get; set; }
-            public int blowType { get; set; }
-            public float blowSpeed { get; set; }
-            public float blowTime { get; set; }
-            public int isGrow { get; set; }
-            public float growthRate { get; set; }
-            public ActionEffect actionEffect { get; set; }
+            public int enemyNum;
+            public CharaDef.ConditionType conditionEnemyNum;
+            public int mysideNum;
+            public CharaDef.ConditionType conditionMysideNum;
+            public CharaDef.AttributeMask attributeMask;
+            public CharaDef.EnemyMask waveEnemyMask;
+            public CharaDef.HealthMask healthMask;
+            public CharaDef.HealthMaskType healthMaskType;
+            public CharaDef.ActionTargetType targetType;
+            public CharaDef.EnemyMask targetMask;
+            public bool breakElement;
+            public float damageRate;
+            public int hitNum;
+            public float hitInterval;
+            public bool dispObjectOnce;
+            public CharaDef.ArtsBlowType blowType;
+            public System.Numerics.Vector3 blowDirection;
+            public float blowSpeed;
+            public float blowTime;
+            public bool isGrow;
+            public float growthRate;
+            public ActionEffect actionEffect;
         }
         public class ActionEffect2
         {
@@ -416,26 +442,36 @@ public partial class KF3Parse
             public float hitStartOffsetTime { get; set; }
             public float effectStartTime { get; set; }
         }
-        public class BuffList
+        public class CharaBuffParam
         {
-            public int attributeMask { get; set; }
-            public int waveEnemyMask { get; set; }
-            public int healthMask { get; set; }
-            public int targetType { get; set; }
-            public int breakElement { get; set; }
-            public int buffType { get; set; }
-            public int abnormalType { get; set; }
-            public int spAttributeMask { get; set; }
-            public int spHealthMask { get; set; }
-            public int spEnemyMask { get; set; }
-            public int timingType { get; set; }
-            public int successRate { get; set; }
-            public int turn { get; set; }
-            public float coefficient { get; set; }
-            public int increment { get; set; }
-            public int isGrow { get; set; }
-            public float growthRate { get; set; }
-            public ActionEffect2 actionEffect { get; set; }
+            public int enemyNum;
+            public CharaDef.ConditionType conditionEnemyNum;
+            public int mysideNum;
+            public CharaDef.ConditionType conditionMysideNum;
+            public CharaDef.AttributeMask attributeMask;
+            public CharaDef.EnemyMask waveEnemyMask;
+            public CharaDef.HealthMask healthMask;
+            public CharaDef.HealthMaskType healthMaskType;
+            public CharaDef.ActionTargetType targetType;
+            public CharaDef.EnemyMask targetMask;
+            public CharaDef.AbilityTraits traitsTerrain;
+            public bool breakElement;
+            public CharaDef.ActionBuffType buffType;
+            public CharaDef.ActionAbnormalMask abnormalType;
+            public CharaDef.ActionAbnormalMask2 abnormalType2;
+            public CharaDef.AttributeMask spAttributeMask;
+            public CharaDef.HealthMask spHealthMask;
+            public CharaDef.EnemyMask spEnemyMask;
+            public CharaDef.ActionTimingType timingType;
+            public int successRate;
+            public int giveupReuseNum;
+            public int turn;
+            public int scheduledTurn;
+            public double coefficient;
+            public int increment;
+            public bool isGrow;
+            public double growthRate;
+            public ActionEffect2 actionEffect;
         }
     }
     public class ParamEnemyBase
@@ -511,24 +547,6 @@ public partial class KF3Parse
             public float effectStartTime { get; set; }
         }
 
-        public class DamageList
-        {
-            public int attributeMask { get; set; }
-            public int waveEnemyMask { get; set; }
-            public int healthMask { get; set; }
-            public int targetType { get; set; }
-            public int breakElement { get; set; }
-            public float damageRate { get; set; }
-            public int hitNum { get; set; }
-            public float hitInterval { get; set; }
-            public int dispObjectOnce { get; set; }
-            public int blowType { get; set; }
-            public float blowSpeed { get; set; }
-            public float blowTime { get; set; }
-            public int isGrow { get; set; }
-            public float growthRate { get; set; }
-            public ActionEffect actionEffect { get; set; }
-        }
         public class ActionEffect2
         {
             public string effectName { get; set; }
@@ -542,35 +560,13 @@ public partial class KF3Parse
             public float effectStartTime { get; set; }
         }
 
-        public class BuffList
-        {
-            public int attributeMask { get; set; }
-            public int waveEnemyMask { get; set; }
-            public int healthMask { get; set; }
-            public int targetType { get; set; }
-            public int breakElement { get; set; }
-            public int buffType { get; set; }
-            public int abnormalType { get; set; }
-            public int spAttributeMask { get; set; }
-            public int spHealthMask { get; set; }
-            public int spEnemyMask { get; set; }
-            public int timingType { get; set; }
-            public int successRate { get; set; }
-            public int turn { get; set; }
-            public float coefficient { get; set; }
-            public int increment { get; set; }
-            public int isGrow { get; set; }
-            public float growthRate { get; set; }
-            public ActionEffect2 actionEffect { get; set; }
-        }
-
         public string m_Name { get; set; }
         public string actionName { get; set; }
         public string actionEffect { get; set; }
         public int actionInfoTime { get; set; }
         public ActionParam actionParam { get; set; }
-        public List<DamageList> damageList { get; set; }
-        public List<BuffList> buffList { get; set; }
+        public List<ParamArts.CharaDamageParam> damageList { get; set; }
+        public List<ParamArts.CharaBuffParam> buffList { get; set; }
 
     }
     public class ParamWaitAction
@@ -585,7 +581,7 @@ public partial class KF3Parse
         public int activationNum { get; set; }
         public string charaEffectName { get; set; }
         public float charaEffectStartOffsetTime { get; set; }
-        public List<BuffList> buffList { get; set; }
+        public List<ParamArts.CharaBuffParam> buffList { get; set; }
         public class ActionEffect
         {
             public string effectName { get; set; }
@@ -597,28 +593,6 @@ public partial class KF3Parse
             public string hitEffectName { get; set; }
             public float hitStartOffsetTime { get; set; }
             public float effectStartTime { get; set; }
-        }
-
-        public class BuffList
-        {
-            public int attributeMask { get; set; }
-            public int waveEnemyMask { get; set; }
-            public int healthMask { get; set; }
-            public int targetType { get; set; }
-            public int breakElement { get; set; }
-            public int buffType { get; set; }
-            public int abnormalType { get; set; }
-            public int spAttributeMask { get; set; }
-            public int spHealthMask { get; set; }
-            public int spEnemyMask { get; set; }
-            public int timingType { get; set; }
-            public int successRate { get; set; }
-            public int turn { get; set; }
-            public float coefficient { get; set; }
-            public int increment { get; set; }
-            public int isGrow { get; set; }
-            public float growthRate { get; set; }
-            public ActionEffect actionEffect { get; set; }
         }
     }
     public class PhotoData
@@ -648,11 +622,12 @@ public partial class KF3Parse
         public string name;
         public string noDestoryFlg;
         public string qeDispDatetime;
-        public string rarity;
+        public int rarity;
         public string reading;
         public string stackMax;
         public string startTime;
-        public string type;
+        public int albumCategory;
+        public int type;
 
         public ParamAbility preEffect;
         public ParamAbility postEffect;

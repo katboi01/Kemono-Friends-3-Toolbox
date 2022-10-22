@@ -33,9 +33,9 @@ public class AssetTool
         }
 
         AssetsFileInstance inst = am.LoadAssetsFileFromBundle(bundleInst, 0);
-        am.LoadClassDatabaseFromPackage(inst.file.typeTree.unityVersion);
+        am.LoadClassDatabaseFromPackage(inst.file.Metadata.UnityVersion);
 
-        inst.file.typeTree.version = (uint)platformId; //5-pc //13-android //20-webgl
+        inst.file.Metadata.TargetPlatform = (uint)platformId; //5-pc //13-android //20-webgl
 
         //commit changes
         byte[] newAssetData;
@@ -43,7 +43,7 @@ public class AssetTool
         {
             using (AssetsFileWriter writer = new AssetsFileWriter(stream))
             {
-                inst.file.Write(writer, 0, new List<AssetsReplacer>() { }, 0);
+                inst.file.Write(writer, 0, new List<AssetsReplacer>() { });
                 newAssetData = stream.ToArray();
             }
         }
@@ -64,7 +64,7 @@ public class AssetTool
         using (var stream = File.OpenWrite(output))
         using (var writer = new AssetsFileWriter(stream))
         {
-            bundleInst.file.Pack(bundleInst.file.reader, writer, AssetBundleCompressionType.LZ4);
+            bundleInst.file.Pack(bundleInst.file.Reader, writer, AssetBundleCompressionType.LZ4);
         }
         bundleInst.file.Close();
 
@@ -96,17 +96,22 @@ public class AssetTool
         }
 
         AssetsFileInstance inst = am.LoadAssetsFileFromBundle(bundleInst, 0);
-        am.LoadClassDatabaseFromPackage(inst.file.typeTree.unityVersion);
+        am.LoadClassDatabaseFromPackage(inst.file.Metadata.UnityVersion);
 
-        foreach (var inf in inst.table.assetFileInfo)
+        foreach (var inf in inst.file.AssetInfos)
         {
-            AssetTypeValueField baseField = am.GetTypeInstance(inst.file, inf).GetBaseField();
-            var fileName = baseField["m_Name"].value.AsString();
+            AssetTypeValueField baseField = am.GetBaseField(inst, inf);
+            var fileName = am.GetBaseField(inst, inf)["m_Name"].Value.AsString;
             var dump = DumpJsonAsset(baseField);
-            var split = fileName.Split("_");
             var id = -1;
+            bool friend1 = false, photo2 = false;
+            var split = fileName.Split("_");
             if (split.Length > 1) int.TryParse(split[1], out id);
-            bool is2 = split.Length > 2;
+            if(split.Length > 2)
+            {
+                if (split[2] == "1") friend1 = true;
+                if (split[2] == "2") photo2 = true;
+            }
             var charaData = local.CharaDatas.FirstOrDefault(c => c.id == id);
             switch (split[0])
             {
@@ -116,7 +121,7 @@ public class AssetTool
                         local.ParamAbilities.Add(ability);
                         if (charaData != null)
                         {
-                            if (is2)
+                            if (friend1)
                                 charaData.ParamAbility2 = ability;
                             else
                                 charaData.ParamAbility = ability;
@@ -126,7 +131,7 @@ public class AssetTool
                             var photoData = local.PhotoDatas.FirstOrDefault(c => c.id == id);
                             if(photoData != null)
                             {
-                                if (is2)
+                                if (photo2)
                                     photoData.postEffect = ability;
                                 else
                                     photoData.preEffect = ability;
@@ -192,24 +197,24 @@ public class AssetTool
 
     private static JToken RecurseJsonDump(AssetTypeValueField field, bool uabeFlavor)
     {
-        AssetTypeTemplateField template = field.GetTemplateField();
+        AssetTypeTemplateField template = field.TemplateField;
 
-        bool isArray = template.isArray;
+        bool isArray = template.IsArray;
 
         if (isArray)
         {
             JArray jArray = new JArray();
 
-            if (template.valueType != EnumValueTypes.ByteArray)
+            if (template.ValueType != AssetValueType.ByteArray)
             {
-                for (int i = 0; i < field.childrenCount; i++)
+                for (int i = 0; i < field.Children.Count; i++)
                 {
-                    jArray.Add(RecurseJsonDump(field.children[i], uabeFlavor));
+                    jArray.Add(RecurseJsonDump(field.Children[i], uabeFlavor));
                 }
             }
             else
             {
-                byte[] byteArrayData = field.GetValue().AsByteArray().data;
+                byte[] byteArrayData = field.Value.AsByteArray;
                 for (int i = 0; i < byteArrayData.Length; i++)
                 {
                     jArray.Add(byteArrayData[i]);
@@ -220,25 +225,25 @@ public class AssetTool
         }
         else
         {
-            if (field.GetValue() != null)
+            if (field.Value != null)
             {
-                EnumValueTypes evt = field.GetValue().GetValueType();
+                AssetValueType evt = field.Value.ValueType;
                 object value;
                 switch (evt)
                 {
-                    case EnumValueTypes.Bool:
-                        value = field.GetValue().AsBool(); break;
-                    case EnumValueTypes.Int8:
-                    case EnumValueTypes.Int16:
-                    case EnumValueTypes.Int32: value = field.GetValue().AsInt(); break;
-                    case EnumValueTypes.Int64: value = field.GetValue().AsInt64(); break;
-                    case EnumValueTypes.UInt8:
-                    case EnumValueTypes.UInt16:
-                    case EnumValueTypes.UInt32: value = field.GetValue().AsUInt(); break;
-                    case EnumValueTypes.UInt64: value = field.GetValue().AsUInt64(); break;
-                    case EnumValueTypes.String: value = field.GetValue().AsString(); break;
-                    case EnumValueTypes.Float: value = field.GetValue().AsFloat(); break;
-                    case EnumValueTypes.Double: value = field.GetValue().AsDouble(); break;
+                    case AssetValueType.Bool:
+                        value = field.Value.AsBool; break;
+                    case AssetValueType.Int8:
+                    case AssetValueType.Int16:
+                    case AssetValueType.Int32: value = field.Value.AsInt; break;
+                    case AssetValueType.Int64: value = field.Value.AsLong; break;
+                    case AssetValueType.UInt8:
+                    case AssetValueType.UInt16:
+                    case AssetValueType.UInt32: value = field.Value.AsUInt; break;
+                    case AssetValueType.UInt64: value = field.Value.AsULong; break;
+                    case AssetValueType.String: value = field.Value.AsString; break;
+                    case AssetValueType.Float: value = field.Value.AsFloat; break;
+                    case AssetValueType.Double: value = field.Value.AsDouble; break;
                     default: value = "invalid"; break;
                 }
 
@@ -248,9 +253,9 @@ public class AssetTool
             {
                 JObject jObject = new JObject();
 
-                for (int i = 0; i < field.childrenCount; i++)
+                for (int i = 0; i < field.Children.Count; i++)
                 {
-                    jObject.Add(field.children[i].GetName(), RecurseJsonDump(field.children[i], uabeFlavor));
+                    jObject.Add(field.Children[i].FieldName, RecurseJsonDump(field.Children[i], uabeFlavor));
                 }
 
                 return jObject;
@@ -263,14 +268,14 @@ public class AssetTool
         AssetBundleFile bundle = bundleInst.file;
 
         MemoryStream bundleStream = new MemoryStream();
-        bundle.Unpack(bundle.reader, new AssetsFileWriter(bundleStream));
+        bundle.Unpack(new AssetsFileWriter(bundleStream));
 
         bundleStream.Position = 0;
 
         AssetBundleFile newBundle = new AssetBundleFile();
-        newBundle.Read(new AssetsFileReader(bundleStream), false);
+        newBundle.Read(new AssetsFileReader(bundleStream));
 
-        bundle.reader.Close();
+        bundle.Reader.Close();
         return newBundle;
     }
 }

@@ -40,8 +40,8 @@ public partial class KF3Parse
     List<string> FillMiracleNumbers(CharaData friend)
     {
         List<string> output = new List<string>();
-        Dictionary<string, DamageList> damages = new Dictionary<string, DamageList>();
-        Dictionary<string, BuffList> buffs = new Dictionary<string, BuffList>();
+        Dictionary<string, CharaDamageParam> damages = new Dictionary<string, CharaDamageParam>();
+        Dictionary<string, CharaBuffParam> buffs = new Dictionary<string, CharaBuffParam>();
         for (int i = 0; i < friend.ParamArts.damageList.Count; i++)
         {
             damages.Add($"[DAMAGE{i}]", friend.ParamArts.damageList[i]);
@@ -56,12 +56,12 @@ public partial class KF3Parse
         for (int i = 1; i < 7; i++)
         {
             string baseText = Regex.Escape(friend.ParamArts.actionEffect);
-            foreach (KeyValuePair<string, DamageList> damage in damages)
+            foreach (KeyValuePair<string, CharaDamageParam> damage in damages)
             {
                 string newValue = ((int)(damage.Value.damageRate * (1 + damage.Value.growthRate * (float)(i - 1)) * 100f + 0.01f)).ToString();
                 baseText = baseText.Replace(damage.Key, newValue);
             }
-            foreach (KeyValuePair<string, BuffList> buff in buffs)
+            foreach (KeyValuePair<string, CharaBuffParam> buff in buffs)
             {
                 if (buff.Key[1] == 'B')
                 {
