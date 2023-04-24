@@ -102,7 +102,8 @@ public partial class KF3Parse
         public List<CharaClothesData> ClothesDatas;
         public ParamAlphaBase ParamAlphaBase;
         public ParamAbility ParamAbility;
-        public ParamAbility ParamAbility2;
+        public ParamAbility ParamAbility1; //miracle trait
+        public ParamAbility ParamAbility2; //rainbow trait
         public ParamArts ParamArts;
         public ParamSpecialAttack ParamSpecialAttack;
         public ParamWaitAction ParamWaitAction;
@@ -1011,6 +1012,8 @@ public partial class KF3Parse
         public string AbilityDesc;
         public string Ability1Name;
         public string Ability1Desc;
+        public string Ability2Name;
+        public string Ability2Desc;
     }
     public class StagesBrief
     {

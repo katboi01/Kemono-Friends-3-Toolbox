@@ -197,11 +197,17 @@ public partial class KF3Parse
         sb.AbilityDesc = GenerateAbilityBuffEffects(friend.ParamAbility.buffList);
         output += $"Unique Trait: {sb.AbilityName}\n{sb.AbilityDesc}\n\n";
 
+        if (friend.ParamAbility1 != null)
+        {
+            sb.Ability1Name = friend.ParamAbility1.abilityName;
+            sb.Ability1Desc = GenerateAbilityBuffEffects(friend.ParamAbility1.buffList);
+            output += $"Miracle Trait: {sb.Ability1Name}\n{sb.Ability1Desc}\n\n";
+        }
         if (friend.ParamAbility2 != null)
         {
-            sb.Ability1Name = friend.ParamAbility2.abilityName;
-            sb.Ability1Desc = GenerateAbilityBuffEffects(friend.ParamAbility2.buffList);
-            output += $"Miracle Trait: {sb.Ability1Name}\n{sb.Ability1Desc}\n\n";
+            sb.Ability2Name = friend.ParamAbility2.abilityName;
+            sb.Ability2Desc = GenerateAbilityBuffEffects(friend.ParamAbility2.buffList);
+            output += $"Rainbow Trait: {sb.Ability2Name}\n{sb.Ability2Desc}\n\n";
         }
 
         //wait
@@ -265,9 +271,14 @@ public partial class KF3Parse
         }
         //abilities
         Console.WriteLine("\n" + "Unique Trait: " + friend.ParamAbility.abilityName + "\n" + friend.ParamAbility.abilityEffect);
+        if (friend.ParamAbility1 != null)
+        {
+            Console.WriteLine("\n" + "Miracle Trait: " + friend.ParamAbility1.abilityName + "\n" + friend.ParamAbility1.abilityEffect);
+        }
+        //rainbow trait
         if (friend.ParamAbility2 != null)
         {
-            Console.WriteLine("\n" + "Miracle Trait: " + friend.ParamAbility2.abilityName + "\n" + friend.ParamAbility2.abilityEffect);
+            Console.WriteLine("\n" + "Rainbow Trait: " + friend.ParamAbility2.abilityName + "\n" + friend.ParamAbility2.abilityEffect);
         }
         //wait
         Console.WriteLine("\n" + "Standby Skill: " + friend.ParamWaitAction.skillName + "\n" + friend.ParamWaitAction.skillEffect);
@@ -291,8 +302,10 @@ public partial class KF3Parse
             WaitName = friend.ParamWaitAction.skillName,
             WaitDesc = friend.ParamWaitAction.skillEffect,
 
-            Ability1Name = friend.ParamAbility2?.abilityName,
-            Ability1Desc = friend.ParamAbility2?.abilityEffect,
+            Ability1Name = friend.ParamAbility1?.abilityName,
+            Ability1Desc = friend.ParamAbility1?.abilityEffect,
+            Ability2Name = friend.ParamAbility2?.abilityName,
+            Ability2Desc = friend.ParamAbility2?.abilityEffect,
             AbilityName = friend.ParamAbility.abilityName,
             AbilityDesc = friend.ParamAbility.abilityEffect
         };
@@ -456,8 +469,10 @@ public partial class KF3Parse
         "|standbyskill=" + friend.ParamWaitAction.skillEffect + "\n" +
         "|unique=" + friend.ParamAbility.abilityName + "\n" +
         "|uniqueskill=" + friend.ParamAbility.abilityEffect + "\n" +
-        "|miracletrait=" + friend.ParamAbility2?.abilityName + "\n" +
-        "|miracletraitskill=" + friend.ParamAbility2?.abilityEffect + "\n";
+        "|miracletrait=" + friend.ParamAbility1?.abilityName + "\n" +
+        "|miracletraitskill=" + friend.ParamAbility1?.abilityEffect + "\n" +
+        "|rainbowtrait=" + (friend.ParamAbility2 != null? friend.ParamAbility2.abilityName : "N/A") + "\n" +
+        "|rainbowtraitskill=" + (friend.ParamAbility2 != null ? friend.ParamAbility2.abilityEffect : "Not implemented yet.") + "\n";
 
 
         string cos = "\n|cos = ";

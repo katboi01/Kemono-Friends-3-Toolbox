@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.DirectoryServices.ActiveDirectory;
 
 public partial class KF3Parse
 {
@@ -92,6 +93,24 @@ public partial class KF3Parse
         Console.WriteLine("File exported to: " + SharedSettings.exportPath + fileName);
     }
 
+    void ExportBGM()
+    {
+        var masterRoomFurniture = JArray.Parse(LoadGzipFile("MASTER_ROOM_FURNITURE_DATA"));
+        var list = new List<string>();
+        foreach(var track in masterRoomFurniture)
+        {
+            if (!string.IsNullOrEmpty(track["bgmFilepath"].ToString()))
+            {
+                list.Add(track["bgmFilepath"].ToString() + ": " + track["bgmName"].ToString());
+            }
+        }
+        list.Sort();
+        foreach (var d in list)
+        {
+            Console.WriteLine(d);
+        }
+    }
+
     void ExportPhotos()
     {
         int frame = 0;
@@ -115,6 +134,64 @@ public partial class KF3Parse
             }
             //DispSkills(data, true);
         }
+    }
+
+    void ExportCSV()
+    {
+        StringBuilder sb = new StringBuilder();
+        var newLine = string.Format("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}\t{13}\t{14}",
+                    "Name",
+                    "Miracle Name",
+                    "Miracle 1",
+                    "Miracle 2",
+                    "Miracle 3",
+                    "Miracle 4",
+                    "Miracle 5",
+                    "Beat Name",
+                    "Beat Effect",
+                    "Wait Name",
+                    "Wait Effect",
+                    "Ability Name",
+                    "Ability Effect",
+                    "Ability2 Name",
+                    "Ability2 Effect"
+                    );
+        sb.AppendLine(newLine);
+
+        foreach (CharaData friend in CharaDatas)
+        {
+            try
+            {
+                List<string> miracleValues = FillMiracleNumbers(friend);
+
+                newLine = string.Format("\"{0}\"\t\"{1}\"\t\"{2}\"\t\"{3}\"\t\"{4}\"\t\"{5}\"\t\"{6}\"\t\"{7}\"\t\"{8}\"\t\"{9}\"\t\"{10}\"\t\"{11}\"\t\"{12}\"\t\"{13}\"\t\"{14}\"\t\"{15}\"\t\"{16}\"",
+                    friend.GetName(),
+                    friend.ParamArts.actionName,
+                    miracleValues[0].Replace("\r\n",@"\r\n").Replace("\n", @"\n"),
+                    miracleValues[1].Replace("\r\n",@"\r\n").Replace("\n", @"\n"),
+                    miracleValues[2].Replace("\r\n",@"\r\n").Replace("\n", @"\n"),
+                    miracleValues[3].Replace("\r\n",@"\r\n").Replace("\n", @"\n"),
+                    miracleValues[4].Replace("\r\n",@"\r\n").Replace("\n", @"\n"),
+                    friend.ParamSpecialAttack.actionName,
+                    friend.ParamSpecialAttack.actionEffect,
+                    friend.ParamWaitAction.skillName,
+                    friend.ParamWaitAction.skillEffect,
+                    friend.ParamAbility.abilityName,
+                    friend.ParamAbility.abilityEffect,
+                    friend.ParamAbility1?.abilityName,
+                    friend.ParamAbility1?.abilityEffect,
+                    friend.ParamAbility2?.abilityName,
+                    friend.ParamAbility2?.abilityEffect
+                    );
+                sb.AppendLine(newLine);
+            }
+            catch
+            {
+                Console.WriteLine("fail");
+            }
+            //DispSkills(data, true);
+        }
+        File.WriteAllText("test.txt", sb.ToString());
     }
 
     void ExportFriend(CharaData friend, bool wiki)

@@ -208,6 +208,7 @@ public partial class KF3Parse
                     case "list enemies": Console.Clear(); ReadEnemyListDebug(); break;
                     case "listmax": Console.Clear(); ListMaxStats(); break;
                     case "droplist": Console.Clear(); ReadDropData(); break;
+                    case "tracklist": Console.Clear(); ExportBGM(); break;
                     case "export":
                         {
                             Console.Clear();
@@ -223,6 +224,8 @@ public partial class KF3Parse
                             Console.WriteLine();
                             break;
                         }
+                    case "export csv":
+                        ExportCSV(); break;
                     case "export wiki": Console.Clear(); ExportForWiki(); break;
                     case "export cards": Console.Clear(); ExportPhotos(); break;
                     case "0": return;

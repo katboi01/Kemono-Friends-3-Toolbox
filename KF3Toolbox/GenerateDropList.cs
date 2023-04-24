@@ -11,12 +11,31 @@ public partial class KF3Parse
         StringBuilder output = new StringBuilder();
         foreach (QuestQuestOneData quest in QuestQuestOneDatas)
         {
-            output.Append(GetStageDrops(quest));
+            //output.Append(GetStageDrops(quest));
+            output.Append(GetBGM(quest));
         }
         using (StreamWriter outputFile = new StreamWriter(Path.Combine(SharedSettings.exportPath, "droplist.txt")))
         {
             outputFile.WriteLine(output.ToString());
         }
+    }
+
+    public string GetBGM(QuestQuestOneData quest)
+    {
+        StringBuilder output = new StringBuilder();
+        List<List<QuestDrawItemData>> drawIds = new List<List<QuestDrawItemData>>();
+
+        output.Append($"Quest: {quest.questOneId}\n{GetStageName(quest.questMap.chapterId)} --- {quest.questGroup.storyName.Replace("\"", "")} / {quest.questOneName.Replace("\"", "")}\n lvl {quest.difficulty} stamina {quest.stamina}\n");
+        foreach (QuestWaveData wave in QuestWaveDatas.Where(w => w.questOneId == quest.questOneId))
+        {
+            output.Append($"    wave {wave.waveId}");
+            if (wave.rate != 1000) output.Append($" chance {wave.rate / 10}%\n");
+            else output.AppendLine();
+            output.Append($"        {wave.waveStartBgmId}\n");
+        }
+        //output.Append(CompileDropList(drawIds));
+        output.AppendLine();
+        return output.ToString();
     }
 
     public string GetStageDrops(QuestQuestOneData quest)

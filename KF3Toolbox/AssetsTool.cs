@@ -104,12 +104,13 @@ public class AssetTool
             var fileName = am.GetBaseField(inst, inf)["m_Name"].Value.AsString;
             var dump = DumpJsonAsset(baseField);
             var id = -1;
-            bool friend1 = false, photo2 = false;
+            bool friend1 = false, friend2 = false, photo2 = false;
             var split = fileName.Split("_");
             if (split.Length > 1) int.TryParse(split[1], out id);
             if(split.Length > 2)
             {
                 if (split[2] == "1") friend1 = true;
+                if (split[2] == "2") friend2 = true;
                 if (split[2] == "2") photo2 = true;
             }
             var charaData = local.CharaDatas.FirstOrDefault(c => c.id == id);
@@ -122,6 +123,8 @@ public class AssetTool
                         if (charaData != null)
                         {
                             if (friend1)
+                                charaData.ParamAbility1 = ability;
+                            else if (friend2)
                                 charaData.ParamAbility2 = ability;
                             else
                                 charaData.ParamAbility = ability;
