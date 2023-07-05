@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using static StolenStuff.CharaDef;
 
 public partial class KF3Parse
@@ -13,7 +14,7 @@ public partial class KF3Parse
             throw new Exception();
         }
 
-        string outputString = "";
+        StringBuilder output = new StringBuilder();
         int hpCosBonus = 0, atkCosBonus = 0, defCosBonus = 0;
 
         foreach (CharaClothesData clothe in friend.ClothesDatas)
@@ -28,11 +29,9 @@ public partial class KF3Parse
         float starBoost = 1 + (friend.rankHigh - 1) * 0.02f;
         int wr = (friend.PromotePresetDatas[4].promoteStepDatetime != "1917860400000") ? 5 : 4;
 
-        int maxHp = 0, maxAtk = 0, maxDef = 0;
-
-        maxHp = StolenStuff.CalcParamInternal(level, 99, friend.ParamAlphaBase.hpParamLv1, friend.ParamAlphaBase.hpParamLv99, friend.ParamAlphaBase.hpParamLvMiddle, friend.ParamAlphaBase.hpLvMiddleNum);
-        maxAtk = StolenStuff.CalcParamInternal(level, 99, friend.ParamAlphaBase.atkParamLv1, friend.ParamAlphaBase.atkParamLv99, friend.ParamAlphaBase.atkParamLvMiddle, friend.ParamAlphaBase.atkLvMiddleNum);
-        maxDef = StolenStuff.CalcParamInternal(level, 99, friend.ParamAlphaBase.defParamLv1, friend.ParamAlphaBase.defParamLv99, friend.ParamAlphaBase.defParamLvMiddle, friend.ParamAlphaBase.defLvMiddleNum);
+        int maxHp = StolenStuff.CalcParamInternal(level, 99, friend.ParamAlphaBase.hpParamLv1, friend.ParamAlphaBase.hpParamLv99, friend.ParamAlphaBase.hpParamLvMiddle, friend.ParamAlphaBase.hpLvMiddleNum);
+        int maxAtk = StolenStuff.CalcParamInternal(level, 99, friend.ParamAlphaBase.atkParamLv1, friend.ParamAlphaBase.atkParamLv99, friend.ParamAlphaBase.atkParamLvMiddle, friend.ParamAlphaBase.atkLvMiddleNum);
+        int maxDef = StolenStuff.CalcParamInternal(level, 99, friend.ParamAlphaBase.defParamLv1, friend.ParamAlphaBase.defParamLv99, friend.ParamAlphaBase.defParamLvMiddle, friend.ParamAlphaBase.defLvMiddleNum);
 
         maxHp = (int)Math.Ceiling((maxHp + friend.GetPromoteStat(wr, "hp")) * starBoost) + hpCosBonus;
         maxAtk = (int)Math.Ceiling((maxAtk + friend.GetPromoteStat(wr, "atk")) * starBoost) + atkCosBonus;
@@ -43,29 +42,29 @@ public partial class KF3Parse
         float actBonus = friend.GetPromoteStat(wr, "act");
         float tryBonus = friend.GetPromoteStat(wr, "try");
 
-        outputString += $"Level: {level}\n" +
-            $"WR: {wr}\n" +
-            $"max STATUS: {CalcStatus(maxHp, maxAtk, maxDef)}\n" +
-            $"max HP: {maxHp}\n" +
-            $"max ATK: {maxAtk}\n" +
-            $"max DEF: {maxDef}\n" +
-            $"evd: {(int)evd / 10}.{evd % 10}%\n" +
-            $"Beat bonus: {(int)beatBonus / 10}.{beatBonus % 10}%\n" +
-            $"Act bonus: {(int)actBonus / 10}.{actBonus % 10}%\n" +
-            $"Try bonus: {(int)tryBonus / 10}.{tryBonus % 10}%\n";
+        output.AppendLine($"Level: {level}");
+        output.AppendLine($"WR: {wr}");
+        output.AppendLine($"max STATUS: {CalcStatus(maxHp, maxAtk, maxDef)}");
+        output.AppendLine($"max HP: {maxHp}");
+        output.AppendLine($"max ATK: {maxAtk}");
+        output.AppendLine($"max DEF: {maxDef}");
+        output.AppendLine($"evd: {(int)evd / 10}.{evd % 10}%");
+        output.AppendLine($"Beat bonus: {(int)beatBonus / 10}.{beatBonus % 10}%");
+        output.AppendLine($"Act bonus: {(int)actBonus / 10}.{actBonus % 10}%");
+        output.AppendLine($"Try bonus: {(int)tryBonus / 10}.{tryBonus % 10}%");
 
-        outputString += "\nCards:\n" +
-            $"{friend.ParamAlphaBase.orderCardType00} {friend.ParamAlphaBase.orderCardValue00}\n" +
-            $"{friend.ParamAlphaBase.orderCardType01} {friend.ParamAlphaBase.orderCardValue01}\n" +
-            $"{friend.ParamAlphaBase.orderCardType02} {friend.ParamAlphaBase.orderCardValue02}\n" +
-            $"{friend.ParamAlphaBase.orderCardType03} {friend.ParamAlphaBase.orderCardValue03}\n" +
-            $"{friend.ParamAlphaBase.orderCardType04} {friend.ParamAlphaBase.orderCardValue04}\n";
-
+        output.AppendLine("\nCards:");
+        output.AppendLine($"{friend.ParamAlphaBase.orderCardType00} {friend.ParamAlphaBase.orderCardValue00}");
+        output.AppendLine($"{friend.ParamAlphaBase.orderCardType01} {friend.ParamAlphaBase.orderCardValue01}");
+        output.AppendLine($"{friend.ParamAlphaBase.orderCardType02} {friend.ParamAlphaBase.orderCardValue02}");
+        output.AppendLine($"{friend.ParamAlphaBase.orderCardType03} {friend.ParamAlphaBase.orderCardValue03}");
+        output.AppendLine($"{friend.ParamAlphaBase.orderCardType04} {friend.ParamAlphaBase.orderCardValue04}");
 
         if (!wiki)
         {
-            Console.WriteLine(outputString);
+            Console.WriteLine(output.ToString());
         }
+
         return new StatsBrief()
         {
             voice = friend.castName,
@@ -83,7 +82,7 @@ public partial class KF3Parse
         };
     }
 
-    void DispPhoto(PhotoData photo, bool wiki)
+    public void DispPhoto(PhotoData photo, bool wiki = false)
     {
         string photoSource = photo.id switch
         {
@@ -166,127 +165,64 @@ public partial class KF3Parse
         }
     }
 
-    public SkillsBrief DispSkills(CharaData friend, bool wiki = false)
+    public SkillsBrief DispSkills2(CharaData friend, bool wiki = false)
     {
         if (friend.ParamAlphaBase == null)
         {
             throw new Exception();
         }
 
-        SkillsBrief sb = new SkillsBrief();
-        string output = "Loaded Friend: " + friend.id + "_" + friend.nameEn + "\n\n";
-
-        sb.MiracleName = friend.ParamArts.actionName;
-        sb.MiracleDesc = GenerateCharaDamageEffect(friend.ParamArts.damageList) + "\n" + GenerateCharaBuffEffect(friend.ParamArts.buffList);
-        sb.MiracleType = friend.ParamArts.authParam.SynergyFlag;
-
-        output += $"Miracle Name: {sb.MiracleName}\n{sb.MiracleDesc}\n\n";
-
-        List<string> miracleValues = FillMiracleNumbers(friend);
-        for (int i = 0; i < miracleValues.Count(); i++)
-        {
-            output += $"Lvl {i + 1}: {miracleValues[i]}\n";
-        }
-
-        output += "\n";
-
-        sb.MiracleMax = miracleValues[4];
-
-        //abilities
-        sb.AbilityName = friend.ParamAbility.abilityName;
-        sb.AbilityDesc = GenerateAbilityBuffEffects(friend.ParamAbility.buffList);
-        output += $"Unique Trait: {sb.AbilityName}\n{sb.AbilityDesc}\n\n";
-
-        if (friend.ParamAbility1 != null)
-        {
-            sb.Ability1Name = friend.ParamAbility1.abilityName;
-            sb.Ability1Desc = GenerateAbilityBuffEffects(friend.ParamAbility1.buffList);
-            output += $"Miracle Trait: {sb.Ability1Name}\n{sb.Ability1Desc}\n\n";
-        }
-        if (friend.ParamAbility2 != null)
-        {
-            sb.Ability2Name = friend.ParamAbility2.abilityName;
-            sb.Ability2Desc = GenerateAbilityBuffEffects(friend.ParamAbility2.buffList);
-            output += $"Rainbow Trait: {sb.Ability2Name}\n{sb.Ability2Desc}\n\n";
-        }
-
-        //wait
-        sb.WaitName = friend.ParamWaitAction.skillName;
-        sb.WaitDesc = $"{GenerateCharaBuffEffect(friend.ParamWaitAction.buffList)}\n{friend.ParamWaitAction.activationRate}% chance, {friend.ParamWaitAction.activationNum} times";
-        output += $"Standby Skill: {sb.WaitName}\n{sb.WaitDesc}\n\n";
-
-        //special
-        sb.BeatName = friend.ParamSpecialAttack.actionName;
-        sb.BeatDesc = GenerateCharaDamageEffect(friend.ParamSpecialAttack.damageList) + "\n" + GenerateCharaBuffEffect(friend.ParamSpecialAttack.buffList);
-        output += $"Special Attack: {sb.BeatName}\n{sb.BeatDesc}";
-        Console.WriteLine(output);
-        if (wiki)
-        {
-            Directory.CreateDirectory(SharedSettings.exportPath + "generated/");
-            File.WriteAllText(SharedSettings.exportPath + "generated/" + friend.nameEn.Trim() + "_" + friend.id + ".txt", output);
-        }
-        return sb;
-    }
-
-    public SkillsBrief DispSkills2(CharaData friend)
-    {
-        if (friend.ParamAlphaBase == null)
-        {
-            throw new Exception();
-        }
-
-        Console.WriteLine("Loaded Friend: " + friend.id + "_" + friend.nameEn + "\n");
-        string output = "";
-        //miracle
-        output += $"Miracle: {friend.ParamArts.actionName}\n{friend.ParamArts.actionEffect}\n" +
-            $"Miracle + card: {friend.ParamArts.authParam.SynergyFlag}";
-        Console.WriteLine(output);
-        Console.WriteLine("Miracle Variable    | lvl1  |  lvl2  |  lvl3  |  lvl4  |  lvl5  |  Miracle+");
+        StringBuilder output = new StringBuilder();
+        output.AppendLine("Loaded Friend: " + friend.id + "_" + friend.nameEn + "\n");
+        output.AppendLine($"Miracle: {friend.ParamArts.actionName}\n{friend.ParamArts.actionEffect}\n");
+        output.AppendLine($"Miracle + card: {friend.ParamArts.authParam.SynergyFlag}");
+        output.AppendFormat("|{0}|{1}|{2}|{3}|{4}|{5}|{6}\n", CenteredString("Miracle Variable", 20), CenteredString("lvl1", 10), CenteredString("lvl2", 10), CenteredString("lvl3", 10), CenteredString("lvl4", 10), CenteredString("lvl5", 10), CenteredString("Miracle+", 10));
         for (int i = 0; i < friend.ParamArts.damageList.Count; i++)
         {
             ParamArts.CharaDamageParam damage = friend.ParamArts.damageList[i];
-            Console.WriteLine($"DAMAGE{i}:          | " + Math.Round(100 * damage.damageRate)
-                + "  |  " + Math.Round(100 * (damage.damageRate * (1 + 1 * damage.growthRate)))
-                + "  |  " + Math.Round(100 * (damage.damageRate * (1 + 2 * damage.growthRate)))
-                + "  |  " + Math.Round(100 * (damage.damageRate * (1 + 3 * damage.growthRate)))
-                + "  |  " + Math.Round(100 * (damage.damageRate * (1 + 4 * damage.growthRate)))
-                + "  |  " + Math.Round(100 * (damage.damageRate * (1 + 5 * damage.growthRate))) + " |");
+            output.AppendFormat("|{0}", CenteredString($"DAMAGE{i}", 20));
+            for (int lvl = 0; lvl < 6; lvl++)
+            {
+                output.AppendFormat("|{0}", CenteredString(Math.Round(100 * (damage.damageRate * (1 + lvl * damage.growthRate))).ToString(), 10));
+            }
+            output.AppendLine();
         }
+
         for (int i = 0; i < friend.ParamArts.buffList.Count; i++)
         {
             ParamArts.CharaBuffParam buff = friend.ParamArts.buffList[i];
-            Console.WriteLine($"BUFF{i}:             | " + Math.Round(100 - 100 * buff.coefficient)
-                + "  |  " + Math.Round(100 - 100 * (buff.coefficient * (1 + 1 * buff.growthRate)))
-                + "  |  " + Math.Round(100 - 100 * (buff.coefficient * (1 + 2 * buff.growthRate)))
-                + "  |  " + Math.Round(100 - 100 * (buff.coefficient * (1 + 3 * buff.growthRate)))
-                + "  |  " + Math.Round(100 - 100 * (buff.coefficient * (1 + 4 * buff.growthRate)))
-                + "  |  " + Math.Round(100 - 100 * (buff.coefficient * (1 + 5 * buff.growthRate))) + " |");
-            Console.WriteLine($"\nTurns: {buff.turn} Activation rate: {buff.successRate}%");
+            output.AppendFormat("|{0}", CenteredString($"Buff{i}", 20));
+            for (int lvl = 0; lvl < 6; lvl++)
+            {
+                output.AppendFormat("|{0}", CenteredString(Math.Round(100 - 100 * (buff.coefficient * (1 + lvl * buff.growthRate))).ToString(), 10));
+            }
+            output.AppendLine($"\nTurns: {buff.turn} Activation rate: {buff.successRate}%");
         }
-        List<string> miracleValues = FillMiracleNumbers(friend);
-        for (int i = 0; i < miracleValues.Count(); i++)
-        {
-            Console.WriteLine($"Lvl {i + 1}:");
-            Console.WriteLine(miracleValues[i]);
-        }
-        //abilities
-        Console.WriteLine("\n" + "Unique Trait: " + friend.ParamAbility.abilityName + "\n" + friend.ParamAbility.abilityEffect);
+
+        output.AppendLine($"\nUnique Trait: {friend.ParamAbility.abilityName}\n{friend.ParamAbility.abilityEffect}");
+
         if (friend.ParamAbility1 != null)
         {
-            Console.WriteLine("\n" + "Miracle Trait: " + friend.ParamAbility1.abilityName + "\n" + friend.ParamAbility1.abilityEffect);
+            output.AppendLine($"\nMiracle Trait: {friend.ParamAbility1.abilityName}\n{friend.ParamAbility1.abilityEffect}");
         }
-        //rainbow trait
+
         if (friend.ParamAbility2 != null)
         {
-            Console.WriteLine("\n" + "Rainbow Trait: " + friend.ParamAbility2.abilityName + "\n" + friend.ParamAbility2.abilityEffect);
+            output.AppendLine($"\nRainbow Trait: {friend.ParamAbility2.abilityName}\n{friend.ParamAbility2.abilityEffect}");
         }
-        //wait
-        Console.WriteLine("\n" + "Standby Skill: " + friend.ParamWaitAction.skillName + "\n" + friend.ParamWaitAction.skillEffect);
-        //special
-        Console.WriteLine("\n" + "Special Attack: " + friend.ParamSpecialAttack.actionName + "\n" + friend.ParamSpecialAttack.actionEffect);
+
+        output.AppendLine($"\nStandby Skill: {friend.ParamWaitAction.skillName}\n{friend.ParamWaitAction.skillEffect}");
+
+        output.AppendLine($"\nSpecial Attack: {friend.ParamSpecialAttack.actionName}\n{friend.ParamSpecialAttack.actionEffect}");
+
         foreach (ParamArts.CharaBuffParam buff in friend.ParamSpecialAttack.buffList)
         {
-            Console.WriteLine($"\n Turns: {buff.turn} Activation rate: {buff.successRate}%");
+            output.AppendLine($"\nTurns: {buff.turn} Activation rate: {buff.successRate}%");
+        }
+
+        if (!wiki)
+        {
+            Console.WriteLine(output.ToString());
         }
 
         return new SkillsBrief()
@@ -294,7 +230,7 @@ public partial class KF3Parse
             MiracleName = friend.ParamArts.actionName,
             MiracleDesc = friend.ParamArts.actionEffect,
             MiracleType = friend.ParamArts.authParam.SynergyFlag,
-            MiracleMax = miracleValues[4],
+            MiracleMax = FillMiracleNumbers(friend)[4],
 
             BeatName = friend.ParamSpecialAttack.actionName,
             BeatDesc = friend.ParamSpecialAttack.actionEffect,
@@ -313,66 +249,70 @@ public partial class KF3Parse
 
     void DispFacts(ref CharaData friend, bool wiki)
     {
-        if (wiki) { Console.Out.Close(); sw = new StreamWriter(SharedSettings.exportPath + friend.nameEn + "_" + friend.id + ".txt", true); Console.SetOut(sw); Console.WriteLine("\n I N F O\n"); }
-        else
-        {
-            Console.Clear();
-            Console.WriteLine("Loaded Friend: " + friend.id + "_" + friend.nameEn + "\n");
-        }
-        Console.WriteLine("Release Date: " + EpochToKF3Time(friend.startTime).ToLongDateString() + "\n");
+        StringBuilder output = new StringBuilder();
+        output.AppendLine($"Release Date: {EpochToKF3Time(friend.startTime).ToLongDateString()}");
+        output.AppendLine($"Animal name: {friend.animalScientificName}, eponym: {friend.eponymName}");
+        output.AppendLine($"Japanese name: {friend.name}, English name: {friend.nameEn}");
+        output.AppendLine($"voice actress: {friend.castName}");
+        output.AppendLine($"Animal's distribution areas: {friend.animalDistributionArea}, habitat: {friend.animalTabitat}");
+        output.AppendLine($"Animal flavor text: {friend.animalFlavorText}");
+        output.AppendLine($"Friend's flavor text: {friend.flavorText}");
 
-        Console.WriteLine("Animal name: " + friend.animalScientificName + ", eponym: " + friend.eponymName + "\n" + "Japanese name: " + friend.name + ", English name: " + friend.nameEn
-            + "\n" + "voice actress: " + friend.castName + "\n" + "Animal's distribution areas: " + friend.animalDistributionArea + ", habitat: " + friend.animalTabitat + "\n" + "Animal flavor text: " + friend.animalFlavorText
-            + "\n" + "Friend's flavor text: " + friend.flavorText);
         if (wiki)
         {
-            Console.Out.Close(); sw = new StreamWriter(Console.OpenStandardOutput())
-            {
-                AutoFlush = true
-            }; Console.SetOut(sw);
+            File.WriteAllText(SharedSettings.exportPath + friend.nameEn + "_" + friend.id + ".txt", output.ToString());
         }
-    }
-    void DispPromoteItems(ref CharaData friend, bool wiki)
-    {
-        if (wiki) { Console.Out.Close(); sw = new StreamWriter(SharedSettings.exportPath + friend.nameEn + "_" + friend.id + ".txt", true); Console.SetOut(sw); Console.WriteLine("\n U P G R A D E\n I T E M S\n"); }
         else
         {
-            Console.Clear();
             Console.WriteLine("Loaded Friend: " + friend.id + "_" + friend.nameEn + "\n");
+            Console.Write(output.ToString());
         }
+    }
+
+    void DispPromoteItems(ref CharaData friend, bool wiki)
+    {
+        StringBuilder output = new StringBuilder();
 
         foreach (PromotePresetData ppd in friend.PromotePresetDatas)
         {
-            Console.Write((ppd.promoteStep + 1) + ": ");
+            output.Append((ppd.promoteStep + 1) + ": ");
             if (ppd.promoteStepDatetime == "1917860400000")
             {
-                Console.WriteLine("Unavailable");
+                output.AppendLine("Unavailable");
             }
             else
             {
                 foreach (PromoteData pd in ppd.promoteDatas)
                 {
-                    Console.Write(GetItemName(pd.promoteUseItemId00) + " ");
+                    output.Append(GetItemName(pd.promoteUseItemId00) + " ");
                 }
             }
-            Console.Write("\n");
+            output.AppendLine();
         }
 
         if (wiki)
         {
-            Console.Out.Close(); sw = new StreamWriter(Console.OpenStandardOutput())
-            {
-                AutoFlush = true
-            }; Console.SetOut(sw);
+            File.WriteAllText($"{SharedSettings.exportPath}{friend.nameEn}_{friend.id}_UpgradeItems.txt", output.ToString());
+        }
+        else
+        {
+            Console.WriteLine("Loaded Friend: " + friend.id + "_" + friend.nameEn + "\n");
+            Console.Write(output.ToString());
         }
     }
+
     bool DispWiki(CharaData friend, bool wiki = false)
     {
-        string outputString = "";
+        StringBuilder output = new StringBuilder();
 
         StatsBrief sb = null;
-        try { sb = DispStats(friend, true); } catch { Console.WriteLine("failed"); return false; }
+        try { sb = DispStats(friend, true); }
+        catch { Console.WriteLine("failed"); return false; }
 
+        var friendClothes = CharaClothesDatas.Where(c => c.clothesPresetId == friend.id).ToList();
+        bool hasPartyDress = friendClothes.Where(f => f.clothesId == 8).Any();
+        bool hasRainbowTrait = friend.ParamAbility2 != null;
+        bool isWR5 = sb.wr == 5;
         string starsWord = "";
         switch (friend.rankLow)
         {
@@ -382,45 +322,68 @@ public partial class KF3Parse
             case 5: starsWord = "Five"; break;
         }
 
-        outputString += $"[[Category:{friend.attribute} KF3 Friends]] [[Category:{starsWord} Star KF3 Friends]] [[Category:Missing Content]] [[Category:Needs Audio]] {{{{#vardefine:id|{friend.id.ToString().PadLeft(4, '0')}}}}}\n\n" +
-            "{{FriendBox/KF3\n" +
-            $"|name={friend.nameEn.Replace("_", " ")}\n" +
-            $"|apppic={friend.nameEn.Replace("_", " ")}KF3.png\n" +
-            $"|apprarity={{{{KF3{friend.rankLow}Star}}}}\n" +
-            $"|seiyuu={friend.castName}\n" +
-            $"|attribute={friend.attribute} {{{{KF3{friend.attribute}}}}}\n" +
-            $"|implemented={EpochToKF3Time(friend.startTime).ToLongDateString()} (App)\n" +
-            $"|id={friend.id}\n" +
-            "}}\n";
+        List<string> categories = new List<string>()
+        {
+            $"[[Category:{friend.attribute} KF3 Friends]]",
+            $"[[Category:{starsWord} Star KF3 Friends]]",
+            $"[[Category:Missing Content]]",
+            $"[[Category:Needs Audio]]",
+            $"{{{{#vardefine:id|{friend.id.ToString().PadLeft(4, '0')}}}}}"
+        };
 
-        outputString += "{{FriendBuilder/KF3\n" +
-            $"|introduction = '''{friend.nameEn.Replace("_", " ")}''' is a Friend that appears in the app version of[[Kemono Friends 3]].\n";
+        if (hasPartyDress)
+        {
+            categories.Insert(categories.Count - 2, "[[Category:Party Dress KF3 Friends]]");
+        }
+        if (isWR5)
+        {
+            categories.Insert(categories.Count - 2, "[[Category:Wild Release 5 KF3 Friends]]");
+        }
+        if (hasRainbowTrait)
+        {
+            categories.Insert(categories.Count - 2, "[[Category:Rainbow Trait KF3 Friends]]");
+        }
+
+        output.AppendLine($"{string.Join(" ", categories)}\n");
+        output.AppendLine("{{FriendBox/KF3");
+        output.AppendLine($"|name={friend.nameEn.Replace("_", " ")}");
+        output.AppendLine($"|apppic={friend.nameEn.Replace("_", " ")}KF3.png");
+        output.AppendLine($"|apprarity={{{{KF3{friend.rankLow}Star}}}}");
+        output.AppendLine($"|seiyuu={friend.castName}");
+        output.AppendLine($"|attribute={friend.attribute} {{{{KF3{friend.attribute}}}}}");
+        output.AppendLine($"|implemented={EpochToKF3Time(friend.startTime).ToLongDateString()} (App)");
+        output.AppendLine($"|id={friend.id}");
+        output.AppendLine($"|wr5={(isWR5? "Yes" : "No")}");
+        output.AppendLine($"|rainbowtrait={(hasRainbowTrait ? "Yes" : "No")}");
+        output.AppendLine($"|partydress={(hasPartyDress ? "Yes" : "No")}");
+        output.AppendLine("}}");
+
+        output.AppendLine("{{FriendBuilder/KF3");
+        output.AppendLine($"|introduction = '''{friend.nameEn.Replace("_", " ")}''' is a Friend that appears in the app version of[[Kemono Friends 3]].");
 
         float starBoostLow = 1 + (friend.rankLow - 1) * 0.02f;
         double hp = Math.Ceiling(StolenStuff.CalcParamInternal(1, 99, friend.ParamAlphaBase.hpParamLv1, friend.ParamAlphaBase.hpParamLv99, friend.ParamAlphaBase.hpParamLvMiddle, friend.ParamAlphaBase.hpLvMiddleNum) * starBoostLow);
         double atk = Math.Ceiling(StolenStuff.CalcParamInternal(1, 99, friend.ParamAlphaBase.atkParamLv1, friend.ParamAlphaBase.atkParamLv99, friend.ParamAlphaBase.atkParamLvMiddle, friend.ParamAlphaBase.atkLvMiddleNum) * starBoostLow);
         double def = Math.Ceiling(StolenStuff.CalcParamInternal(1, 99, friend.ParamAlphaBase.defParamLv1, friend.ParamAlphaBase.defParamLv99, friend.ParamAlphaBase.defParamLvMiddle, friend.ParamAlphaBase.defLvMiddleNum) * starBoostLow);
 
-        outputString +=
-            $"|status={CalcStatus((int)hp, (int)atk, (int)def)}\n" +
-            $"|hp={hp}\n" +
-            $"|atk={atk}\n" +
-            $"|def={def}\n" +
-            $"|evd={friend.ParamAlphaBase.avoidRatio}%\n" +
-            $"|beat=+{friend.GetPromoteStat(0, "beat")}%\n" +
-            $"|action=+{friend.GetPromoteStat(0, "act")}%\n" +
-            $"|try=+{friend.GetPromoteStat(0, "try")}%\n" +
-            $"|plasm={friend.ParamAlphaBase.plasmPoint}\n";
+        output.AppendLine($"|status={CalcStatus((int)hp, (int)atk, (int)def)}");
+        output.AppendLine($"|hp={hp}");
+        output.AppendLine($"|atk={atk}");
+        output.AppendLine($"|def={def}");
+        output.AppendLine($"|evd={friend.ParamAlphaBase.avoidRatio}%");
+        output.AppendLine($"|beat=+{friend.GetPromoteStat(0, "beat")}%");
+        output.AppendLine($"|action=+{friend.GetPromoteStat(0, "act")}%");
+        output.AppendLine($"|try=+{friend.GetPromoteStat(0, "try")}%");
+        output.AppendLine($"|plasm={friend.ParamAlphaBase.plasmPoint}");
 
-        outputString +=
-            $"|maxstatus={sb.status}\n" +
-            $"|maxhp={sb.hp}\n" +
-            $"|maxatk={sb.atk}\n" +
-            $"|maxdef={sb.def}\n" +
-            $"|maxevd={sb.evd}\n" +
-            $"|maxbeat={sb.beatBonus}\n" +
-            $"|maxaction={sb.actBonus}\n" +
-            $"|maxtry={sb.tryBonus}\n";
+        output.AppendLine($"|maxstatus={sb.status}");
+        output.AppendLine($"|maxhp={sb.hp}");
+        output.AppendLine($"|maxatk={sb.atk}");
+        output.AppendLine($"|maxdef={sb.def}");
+        output.AppendLine($"|maxevd={sb.evd}");
+        output.AppendLine($"|maxbeat={sb.beatBonus}");
+        output.AppendLine($"|maxaction={sb.actBonus}");
+        output.AppendLine($"|maxtry={sb.tryBonus}");
 
         int[] cardArray = new int[] { friend.ParamAlphaBase.orderCardType00, friend.ParamAlphaBase.orderCardType01, friend.ParamAlphaBase.orderCardType02, friend.ParamAlphaBase.orderCardType03, friend.ParamAlphaBase.orderCardType04 };
         int[] cardValueArray = new int[] { friend.ParamAlphaBase.orderCardValue00, friend.ParamAlphaBase.orderCardValue01, friend.ParamAlphaBase.orderCardValue02, friend.ParamAlphaBase.orderCardValue03, friend.ParamAlphaBase.orderCardValue04 };
@@ -453,99 +416,46 @@ public partial class KF3Parse
                 break;
         }
 
-        outputString += cards + "\n" +
-            "|miracleplus={{" + cardType + "}}\n" +
-            "|miracle=" + friend.ParamArts.actionName;
+        output.AppendLine(cards);
+        output.AppendLine($"|miracleplus={{{cardType}}}");
+        output.AppendLine($"|miracle={friend.ParamArts.actionName}");
 
         List<string> miracleValues = FillMiracleNumbers(friend);
         for (int i = 0; i < miracleValues.Count(); i++)
         {
-            outputString += ("\n|miracle" + (i + 1) + "=" + miracleValues[i].Replace(@"\r\n", "\n").Replace(@"\n", "\n").Replace(@"\", " "));
+            output.Append("\n|miracle" + (i + 1) + "=" + miracleValues[i].Replace(@"\r\n", "\n").Replace(@"\n", "\n").Replace(@"\", " "));
         }
 
-        outputString += "\n|beatname=" + friend.ParamSpecialAttack.actionName + "\n" +
-        "|beatskill=" + friend.ParamSpecialAttack.actionEffect + "\n" +
-        "|standby=" + friend.ParamWaitAction.skillName + "\n" +
-        "|standbyskill=" + friend.ParamWaitAction.skillEffect + "\n" +
-        "|unique=" + friend.ParamAbility.abilityName + "\n" +
-        "|uniqueskill=" + friend.ParamAbility.abilityEffect + "\n" +
-        "|miracletrait=" + friend.ParamAbility1?.abilityName + "\n" +
-        "|miracletraitskill=" + friend.ParamAbility1?.abilityEffect + "\n" +
-        "|rainbowtrait=" + (friend.ParamAbility2 != null? friend.ParamAbility2.abilityName : "N/A") + "\n" +
-        "|rainbowtraitskill=" + (friend.ParamAbility2 != null ? friend.ParamAbility2.abilityEffect : "Not implemented yet.") + "\n";
+        output.AppendLine($"\n|beatname={friend.ParamSpecialAttack.actionName}");
+        output.AppendLine($"|beatskill={friend.ParamSpecialAttack.actionEffect}");
+        output.AppendLine($"|standby={friend.ParamWaitAction.skillName}");
+        output.AppendLine($"|standbyskill={friend.ParamWaitAction.skillEffect}");
+        output.AppendLine($"|unique={friend.ParamAbility.abilityName}");
+        output.AppendLine($"|uniqueskill={friend.ParamAbility.abilityEffect}");
+        output.AppendLine($"|miracletrait={friend.ParamAbility1?.abilityName}");
+        output.AppendLine($"|miracletraitskill={friend.ParamAbility1?.abilityEffect}");
+        output.AppendLine($"|rainbowtrait={(friend.ParamAbility2 != null? friend.ParamAbility2.abilityName : "N/A")}");
+        output.AppendLine($"|rainbowtraitskill={(friend.ParamAbility2 != null ? friend.ParamAbility2.abilityEffect : "Not implemented yet.")}");
 
 
         string cos = "\n|cos = ";
-        string cosname = "\n|cosname = ";
         string cosobt = "\n|cosobt = ";
+        string cosname = "\n|cosname = ";
 
-        List<CharaClothesData> costumes = CharaClothesDatas.Where(c => c.clothesPresetId == friend.id).ToList();
-        for (int i = 0; i < costumes.Count; i++)
+        var costumes = GetCostumesForWiki(friendClothes, friend.rankLow);
+        cos = cos + string.Join(",", costumes.Select(c => c.ImageName)) + ",end";
+        cosobt = cosobt + string.Join(",", costumes.Select(c => c.Obtain));
+        cosname = cosname + string.Join(",", costumes.Select(c => c.Name));
+
+        output.Append(cos);
+        output.Append(cosname); 
+        output.Append(cosobt);
+        output.AppendLine("}}");
+
+        if (wiki)
         {
-            switch (i)
-            {
-                case 0:
-                    {
-                        cos += "icon dressup " + costumes[i].id + ".png,";
-                        cosname += "Default";
-                        cosobt += "Default";
-                        break;
-                    }
-                case 1:
-                    {
-                        cos += "icon dressup " + costumes[i].id + ".png,";
-                        cosname += ",Tracksuit";
-                        cosobt += friend.rankLow >= 3 ? ",Default" : ",Upgrade to 3 Stars";
-                        break;
-                    }
-                case 2:
-                    {
-                        cos += "icon dressup " + costumes[i].id + ".png,";
-                        cosname += ",Park Staff";
-                        cosobt += friend.rankLow >= 4 ? ",Default" : ",Upgrade to 4 Stars";
-                        break;
-                    }
-                case 3:
-                    {
-                        cos += "icon dressup " + costumes[i].id + ".png,";
-                        cosname += ",Café Uniform";
-                        cosobt += friend.rankLow >= 5 ? ",Default" : ",Upgrade to 5 Stars";
-                        break;
-                    }
-                case 4:
-                    {
-                        if (friend.rankHigh == 6)
-                        {
-                            cos += "icon dressup " + costumes[i].id + ".png,";
-                            cosname += ",Personal Fashion";
-                            cosobt += friend.rankLow >= 6 ? ",Default" : ",Upgrade to 6 Stars";
-                            break;
-                        }
-                        else
-                        {
-                            cos += "icon dressup " + costumes[i].id + ".png,";
-                            cosname += "," + costumes[i].name;
-                            cosobt += ", ";
-                            break;
-                        }
-                    }
-                default:
-                    {
-                        cos += "icon dressup " + costumes[i].id + ".png,";
-                        cosname += "," + costumes[i].name;
-                        cosobt += ", ";
-                        break;
-                    }
-
-            }
-
+            File.WriteAllText(SharedSettings.exportPath + "wiki/" + friend.nameEn.Trim() + "_" + friend.id + "_wiki.txt", output.ToString());
         }
-
-        cos += "end";
-
-        outputString += cos + cosname + cosobt + "\n}}";
-
-        if (wiki) { File.WriteAllText(SharedSettings.exportPath + "wiki/" + friend.nameEn.Trim() + "_" + friend.id + "_wiki.txt", outputString); }
         return true;
     }
 

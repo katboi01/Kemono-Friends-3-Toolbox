@@ -179,6 +179,7 @@ public partial class KF3Parse
     {
         public int atkBonus;
         public string bgTextureName;
+        public int clothesId;
         public int clothesPresetId;
         public int defBonus;
         public string flavorText;
@@ -194,6 +195,15 @@ public partial class KF3Parse
         public string replaceItemNum;
         public int stackMax;
     }
+
+    public class CostumeDataBrief
+    {
+        public string
+            Name,
+            ImageName,
+            Obtain;
+    }
+
     public class EventData
     {
         public string bgFilename;

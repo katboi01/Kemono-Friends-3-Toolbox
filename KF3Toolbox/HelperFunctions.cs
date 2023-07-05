@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using System.Net;
 using System.Web;
 using static KF3Parse.ParamArts;
+using System.Diagnostics;
 
 public partial class KF3Parse
 {
@@ -84,6 +85,19 @@ public partial class KF3Parse
         }
 
         return output;
+    }
+
+    static string CenteredString(string s, int width)
+    {
+        if (s.Length >= width)
+        {
+            return s;
+        }
+
+        int leftPadding = (width - s.Length) / 2;
+        int rightPadding = width - s.Length - leftPadding;
+
+        return new string(' ', leftPadding) + s + new string(' ', rightPadding);
     }
 
     public string LoadGzipFile(string fileName)
@@ -189,7 +203,7 @@ public partial class KF3Parse
         }
     }
 
-    string GetEnemyName(int id)
+    public static string GetEnemyName(int id)
     {
         var cases = new Dictionary<Func<int, bool>, string>
             {
@@ -227,6 +241,189 @@ public partial class KF3Parse
                 { x => x != -1 , "No Data" }
             };
         return cases.First(kvp => kvp.Key(id)).Value;
+    }
+
+    public static List<CostumeDataBrief> GetCostumesForWiki(List<CharaClothesData> data, int defaultRarity)
+    {
+        List<CostumeDataBrief> output = new List<CostumeDataBrief>();
+        foreach(var costume in data)
+        {
+            var cos = new CostumeDataBrief()
+            {
+                ImageName = "icon dressup " + costume.id + ".png",
+                Obtain = "Limited"
+            };
+            switch (costume.clothesId)
+            {
+                case 1:
+                    cos.Name = "Default";
+                    cos.Obtain = "Default";
+                    break;
+                case 3:
+                    cos.Name = "Tracksuit";
+                    cos.Obtain = defaultRarity < costume.getRank ? $"Upgrade to {costume.getRank} Stars" : "Default";
+                    break;
+                case 4:
+                    cos.Name = "Park Staff";
+                    cos.Obtain = defaultRarity < costume.getRank? $"Upgrade to {costume.getRank} Stars" : "Default";
+                    break;
+                case 5:
+                    cos.Name = "Café Uniform";
+                    cos.Obtain = defaultRarity < costume.getRank ? $"Upgrade to {costume.getRank} Stars" : "Default";
+                    break;
+                case 6:
+                    cos.Name = "Special Outfit 1";
+                    break;
+                case 2:
+                    cos.Name = "Personal Fashion";
+                    cos.Obtain = defaultRarity < costume.getRank ? $"Upgrade to {costume.getRank} Stars" : "Default";
+                    break;
+                case 8:
+                    cos.Name = "Party Dress";
+                    cos.Obtain = "Increase Photo Pocket level to 12";
+                    break;
+                case 9:
+                    cos.Name = "School Uniform";
+                    break;
+                case 10:
+                    cos.Name = "Gym Clothes";
+                    break;
+                case 11:
+                    cos.Name = "Raincoat";
+                    break;
+                case 12:
+                    cos.Name = "Hanamaru Animal Swimsuit";
+                    break;
+                case 13:
+                    cos.Name = "Cafe Uniform (Green)";
+                    cos.Obtain = "Dojo reward";
+                    break;
+                case 14:
+                    cos.Name = "Cafe Uniform (Blue)";
+                    cos.Obtain = "Dojo reward";
+                    break;
+                case 15:
+                    cos.Name = "Cafe Uniform (Pink)";
+                    cos.Obtain = "Dojo reward";
+                    break;
+                case 16:
+                    cos.Name = "Orihime Costume";
+                    break;
+                case 17:
+                    cos.Name = "Arle's Outfit";
+                    break;
+                case 18:
+                    cos.Name = "Marine Nanoda! Swimsuit";
+                    break;
+                case 19:
+                    cos.Name = "Batten Japari Dan Swimsuit";
+                    break;
+                case 20:
+                    cos.Name = "Lifeguard Swimsuit";
+                    break;
+                case 21:
+                    cos.Name = "Harvest Festival Outfit";
+                    break;
+                case 22:
+                    cos.Name = "Halloween Costume";
+                    break;
+                case 23:
+                    cos.Name = "Classic Maid Uniform";
+                    break;
+                case 24:
+                    cos.Name = "Arle's Outfit";
+                    break;
+                case 25:
+                    cos.Name = "Swimsuit";
+                    break;
+                case 26:
+                    cos.Name = "Swimsuit";
+                    break;
+                case 27:
+                    cos.Name = "Swimsuit";
+                    break;
+                case 28:
+                    cos.Name = "Matching Clothes";
+                    break;
+                case 29:
+                    cos.Name = "Frilly Frilly PPP Bikini";
+                    break;
+                case 30:
+                    cos.Name = "Venus Flower Bikini";
+                    break;
+                case 31:
+                    cos.Name = "Christmas Dress";
+                    break;
+                case 32:
+                    cos.Name = "Chinese Shrine Maiden";
+                    break;
+                case 33:
+                    cos.Name = "Chinese Dress";
+                    break;
+                case 34:
+                    cos.Name = "Hanamaru Stage Costume";
+                    break;
+                case 35:
+                    cos.Name = "Camo Outfit";
+                    break;
+                case 36:
+                    cos.Name = "でびでび・ふりる";
+                    break;
+                case 37:
+                    cos.Name = "夜に紛れし闇の衣";
+                    break;
+                case 38:
+                    cos.Name = "Santa";
+                    break;
+                case 39:
+                    cos.Name = "Fluffy Pajamas";
+                    break;
+                case 40:
+                    cos.Name = "Japanese Armor";
+                    break;
+                case 41:
+                    cos.Name = "Miko Outfit";
+                    break;
+                case 42:
+                    cos.Name = "PPP Hoodie";
+                    break;
+                case 43:
+                    cos.Name = "Blue Tracksuit";
+                    break;
+                case 44:
+                    cos.Name = "Park Staff (beige)";
+                    break;
+                case 45:
+                    cos.Name = "Sailor School Uniform";
+                    break;
+                case 46:
+                    cos.Name = "Snow Knight Dress";
+                    break;
+                case 47:
+                    cos.Name = "Sparkling Tree Dress";
+                    break;
+                case 48:
+                    cos.Name = "Retro Detective";
+                    break;
+                case 49:
+                    cos.Name = "Steampunk Detective";
+                    break;
+                case 50:
+                    cos.Name = "鞠と花びらのはんなり和風服";
+                    break;
+                case 51:
+                    cos.Name = "Numazu Deep Sea Aquarium Clothes";
+                    break;
+                case 52:
+                    cos.Name = "たのしいことをお届け！";
+                    break;
+                default:
+                    Console.WriteLine($"{costume.clothesId}\t{costume.id}\t{costume.name}");
+                    break;
+            }
+            output.Add(cos);
+        }
+        return output;
     }
 
     void PrintArray(string text)
