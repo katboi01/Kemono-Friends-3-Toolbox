@@ -417,7 +417,7 @@ public partial class KF3Parse
         }
 
         output.AppendLine(cards);
-        output.AppendLine($"|miracleplus={{{cardType}}}");
+        output.AppendLine($"|miracleplus={{{{{cardType}}}}}");
         output.AppendLine($"|miracle={friend.ParamArts.actionName}");
 
         List<string> miracleValues = FillMiracleNumbers(friend);
